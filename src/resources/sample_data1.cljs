@@ -28,26 +28,28 @@
    :current-table-view :default
 
    ;; data
-   :slots              {"monday"  [{:main-label   "CSCA08"
-                                    :abbreviation "A08"
-                                    :group        "CSCA08"
-                                    :column       "monday"
-                                    :start-time   10
-                                    :end-time     12
-                                    :type         "lec"}]
+   :slots              {"monday"  {:required {:main-label   "CSCA08"
+                                              :abbreviation "A08"
+                                              :group        "CSCA08"
+                                              :column       "monday"
+                                              :start-time   10
+                                              :end-time     12}
+                                   :optional {:type "lec"}}
+
                         "tuesday" [{:conflict true
                                     ;:start-time 9                                                                              ;; ref # min items time (calculated on demand)
                                     ;:end-time   11                                                                             ;; ref # max items time (calculated on demand)
-                                    :items    [{:main-label "CSCA08H3"
-                                                :group      "CSCA08"
-                                                :column     "tuesday"
-                                                :start-time 9
-                                                :end-time   10
-                                                :type       "tut"}
-                                               {:main-label "MATA31H3"
-                                                :group      "MATA31"
-                                                :column     "tuesday"
-                                                :start-time 9
-                                                :end-time   11
-                                                :type       "lec"}]}]}
+                                    :items    [{:required {:main-label "CSCA08H3"
+                                                           :group      "CSCA08"
+                                                           :column     "tuesday"
+                                                           :start-time 9
+                                                           :end-time   10}
+                                                :optional {:type "tut"}}
+
+                                               {:required {:main-label "MATA31H3"
+                                                           :group      "MATA31"
+                                                           :column     "tuesday"
+                                                           :start-time 9
+                                                           :end-time   11}
+                                                :optional {:type "lec"}}]}]}
    })

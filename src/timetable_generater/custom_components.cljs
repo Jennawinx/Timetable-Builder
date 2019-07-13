@@ -4,6 +4,8 @@
             [reagent.core :as reagent]
             [clojure.string :as s]))
 
+(def typeahead-value (reagent/atom nil))
+
 (defn field
   ([label input]
    (field {} label input))
@@ -44,21 +46,23 @@
               (clj->js {:name   "states"
                         :source (match-search options)})))
 
-(def typeahead-value (reagent/atom nil))
-
 (defn render-typeahead [config]
   [:input.typeahead.ui.search.dropdown
    (merge
      config
-     {:type        :text
-      :on-select   #(reset! typeahead-value (-> % .-target .-value))
-      :placeholder "States of USA"})])
+     {:type      :text
+      :on-select #(reset! typeahead-value (-> % .-target .-value))})])
 
 (defn typeahead [config options]
   (reagent/create-class
     {:component-did-mount (partial typeahead-mounted options)
      :reagent-render      (partial render-typeahead config)}))
 
-(defn ui-search [config options]
+(defn ui-search' [config options]
+  ;(println options @typeahead-value)
   [:div.ui-widget
    [typeahead config options]])
+
+;; Have to do this because of odd reference bugs
+(defn ui-search [config options]
+  [(partial ui-search' config options)])

@@ -27,20 +27,26 @@
                      (f/ui-button {:icon true}
                                   (f/ui-icon {:name icons/align-justify-icon}))))
 
-(defn load-optional-field []
+(defn load-optional-field
+  [field]
   [:div.fields {:class "two"}
    [custom/field {:class "five wide"}
-    "Optional Field Example" nil]
-   [custom/field {:class "ui action input ten wide"}
-    nil
-    [custom/ui-input {} nil]
+    field nil]
+   [custom/field {:class "ui action input ten wide"} nil
+    [custom/ui-input
+     {:value    @(rf/subscribe [:add-slot/get-optional-field field])
+      :onChange #(rf/dispatch [:add-slot/update-optional-field field (element-value %)])}
+     nil]
     [custom/ui-button
      {:class   "ui icon button-icon"
       :onClick #(println "delete me")}
      (f/ui-icon {:name icons/trash-icon})]]])
 
 (defn load-optional-fields [fields]
-  )
+  (->> fields
+       sort
+       (map load-optional-field)
+       (into [:div])))
 
 
 
@@ -52,34 +58,40 @@
      ;; first row
      [:div.fields {:class "two"}
       [custom/field {:class "ten wide"} "Main Label"
-       [custom/ui-input {:onBlur #(rf/dispatch [:add-slot/update-field :main-label (element-value %)])}]]
+       [custom/ui-input
+        {:onBlur #(rf/dispatch [:add-slot/update-required-field :main-label (element-value %)])}]]
       [custom/field {:class "six wide"} "Abbreviation"
-       [custom/ui-input {:onBlur #(rf/dispatch [:add-slot/update-field :abbreviation (element-value %)])}]]]
+       [custom/ui-input
+        {:onBlur #(rf/dispatch [:add-slot/update-required-field :abbreviation (element-value %)])}]]]
 
      ;; second row
      [:div.fields {:class "three"}
       [custom/field {:class "five wide"} "Start Time"
-       [custom/ui-input {:onBlur #(rf/dispatch [:add-slot/update-field :start-time (element-value %)])}]]
+       [custom/ui-input
+        {:onBlur #(rf/dispatch [:add-slot/update-required-field :start-time (element-value %)])}]]
       [custom/field {:class "five wide"} "End Time"
-       [custom/ui-input {:onBlur #(rf/dispatch [:add-slot/update-field :end-time (element-value %)])}]]
+       [custom/ui-input
+        {:onBlur #(rf/dispatch [:add-slot/update-required-field :end-time (element-value %)])}]]
       [custom/field {:class "six wide"} "Group"
        [custom/ui-search
-        {:onBlur #(rf/dispatch [:add-slot/update-field :group (element-value %)])}
-        #{"asdf" "few"}]]]
+        {:onBlur #(rf/dispatch [:add-slot/update-required-field :group (element-value %)])}
+        @(rf/subscribe [:db-get-field :groups])]]]
 
      (f/ui-divider)
 
      ;; Add fields
-     [load-optional-fields]
+     [load-optional-fields (keys @(rf/subscribe [:add-slot/get-optional-fields]))]
 
      (f/ui-divider)
 
      [custom/field {:class "ui action input"}
       nil
-      [custom/ui-input {:placeholder "Add Label"}]
+      [custom/ui-input
+       {:placeholder "Add Field"
+        :onBlur      #(rf/dispatch [:add-slot/update-field-to-add (element-value %)])}]
       [custom/ui-button
        {:class   "ui icon button-icon"
-        :onClick #(println "Addd!!")}
+        :onClick #(rf/dispatch [:add-slot/add-optional-field])}
        (f/ui-icon {:name icons/add-icon})]]
 
      ;; Finish
