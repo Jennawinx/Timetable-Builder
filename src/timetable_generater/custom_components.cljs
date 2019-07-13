@@ -1,6 +1,8 @@
 (ns timetable-generater.custom-components
   (:require [fulcrologic.semantic-ui.factories :as f]
-            [fulcrologic.semantic-ui.icons :as i]))
+            [fulcrologic.semantic-ui.icons :as i]
+            [reagent.core :as reagent]
+            [clojure.string :as s]))
 
 (defn field
   ([label input]
@@ -13,3 +15,50 @@
    (apply conj
           (field options label input)
           args)))
+
+(defn ui-button
+  [config content]
+  [:div.ui.button config content])
+
+(defn ui-input
+  [config]
+  [:div.ui.input
+   [:input (assoc config :type :text)]])
+
+;; ------- ui search -------
+
+(defn match-search [strs]
+  (fn [text callback]
+    (->> strs
+         (sort)
+         (filter #(s/includes? (s/lower-case %) (s/lower-case text)))
+         (take 5)
+         (clj->js)
+         (callback))))
+
+(defn typeahead-mounted [options this]
+  (.typeahead (js/$ (reagent/dom-node this))
+              (clj->js {:hint      true
+                        :highlight true
+                        :minLength 1})
+              (clj->js {:name   "states"
+                        :source (match-search options)})))
+
+(def typeahead-value (reagent/atom nil))
+
+(defn render-typeahead [config]
+  [:input.typeahead.ui.search.dropdown
+   (merge
+     config
+     {:type        :text
+      :on-select   #(reset! typeahead-value (-> % .-target .-value))
+      :placeholder "States of USA"})])
+
+(defn typeahead [config options]
+  (reagent/create-class
+    {:component-did-mount (partial typeahead-mounted options)
+     :reagent-render      (partial render-typeahead config)}))
+
+(defn ui-search [config options]
+  [:div.ui-widget
+   [typeahead config options]])

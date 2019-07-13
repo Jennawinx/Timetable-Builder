@@ -5,23 +5,27 @@
   :initialize-db
   (fn [_ _]
     {
-     ;; styling
-     :groups             {}
-     :labels             {}
-     :cell-views         {}
-     :table-views        {}
 
-     ;; if we rename, we don't have to change references
-     :col-name->id       {}
-     :cell-views->id     {}
-     :table-views->id    {}
+     ;; Auto-fill
+     :main-labels        #{}
+     :groups             #{}
+     :labels             #{}
+
+     ;; styling
+     ;:themes             {}
+     ;:cell-views         {}
+     ;:table-views        {}
 
      ;; active
      :current-cell-view  :default
      :current-table-view :default
 
      ;; data
-     :slots              {}}))
+     :slots              {}
+
+     ;; editor temp & rendering
+     :editor             {:add-slot {}}
+     }))
 
 (rf/reg-sub
   :db-peek
@@ -29,4 +33,14 @@
     db))
 
 
-(def a 3)
+;; ---------------- ADD SLOT ----------------
+
+(rf/reg-event-db
+  :add-slot/update-field
+  (fn [db [_ field value]]
+    (assoc-in db [:editor :add-slot field] value)))
+
+(rf/reg-event-db
+  :update-field
+  (fn [db [_ field value]]
+    (assoc-in db [:editor :add-slot field] value)))
