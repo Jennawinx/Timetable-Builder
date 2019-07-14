@@ -1,8 +1,13 @@
 (ns timetable-generater.custom-components
-  (:require [fulcrologic.semantic-ui.factories :as f]
-            [fulcrologic.semantic-ui.icons :as i]
+  (:require [clojure.string :as s]
             [reagent.core :as reagent]
-            [clojure.string :as s]))
+
+            [fulcrologic.semantic-ui.factories :as f]
+            [fulcrologic.semantic-ui.icons :as i]
+
+            [re-frame.core :as rf]
+            [timetable-generater.subscriptions]
+            [timetable-generater.utils :refer [element-value]]))
 
 (def typeahead-value (reagent/atom nil))
 
@@ -26,6 +31,14 @@
   [config]
   [:div.ui.input
    [:input (assoc config :type :text)]])
+
+(defn ui-db-input
+  [data-location config]
+  [ui-input
+   (merge
+     {:defaultValue @(rf/subscribe [:db-get-in data-location])
+      :onBlur       #(rf/dispatch [:db-assoc-in data-location (element-value %)])}
+     config)])
 
 ;; ------- ui search -------
 
@@ -66,3 +79,12 @@
 ;; Have to do this because of odd reference bugs
 (defn ui-search [config options]
   [(partial ui-search' config options)])
+
+(defn ui-db-search
+  [data-location options config]
+  [ui-search
+   (merge
+     {:defaultValue @(rf/subscribe [:db-get-in data-location])
+      :onBlur       #(rf/dispatch [:db-assoc-in data-location (element-value %)])}
+     config)
+   options])

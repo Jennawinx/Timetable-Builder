@@ -7,12 +7,17 @@
             [timetable-generater.utils :refer [element-value]]
             [reagent.core :as r]))
 
-(defn load-optional-field
-  [field]
+(def editor :add-slot)
+(def rf-sub-location [:editor editor])
+(def rf-sub-location-required (conj rf-sub-location :required))
+(def rf-sub-location-optional (conj rf-sub-location :optional))
+
+
+(defn load-optional-field [field]
   [:div.fields {:class "two"}
-   [custom/field {:class "five wide"}
-    field nil]
-   [custom/field {:class "ui action input ten wide"} nil
+   [custom/field {:class "four wide"} field]
+   [custom/field {:class "ui action input sixteen wide"} nil
+    #_[custom/ui-db-input (conj rf-sub-location :optional field)]
     [custom/ui-input
      {:defaultValue @(rf/subscribe [:add-slot/get-optional-field field])
       :onBlur       #(rf/dispatch [:add-slot/update-optional-field field (element-value %)])}]
@@ -27,56 +32,62 @@
        (map load-optional-field)
        (into [:div])))
 
+(defn load-required-fields []
+  [:div
+   ;; first row
+   [:div.fields {:class "three"}
+    [custom/field {:class "eight wide"} "Main Label"
+     [custom/ui-db-search (conj rf-sub-location-required :main-label) (keys @(rf/subscribe [:db-get-field :main-labels]))]]
+    [custom/field {:class "three wide"} "Abbreviation"
+     [custom/ui-db-input (conj rf-sub-location-required :abbreviation)
+      ;; TODO do not use old subs
+      {:value    (or @(rf/subscribe [:add-slot/get-required-field :abbreviation])
+                     @(rf/subscribe [:add-slot/get-abbreviation])
+                     @(rf/subscribe [:add-slot/get-required-field :main-label]))
+       :onChange #(rf/dispatch [:add-slot/update-required-field :abbreviation (element-value %)])}]]
+    [custom/field {:class "five wide"} "Group"
+     [custom/ui-db-search (conj rf-sub-location-required :group) @(rf/subscribe [:db-get-field :groups])]]]
+
+   ;; second row
+   [:div.fields {:class "three"}
+    [custom/field {:class "six wide"} "Day/Section"
+     [custom/ui-db-input (conj rf-sub-location-required :end-time)]]
+    [custom/field {:class "five wide"} "Start Time"
+     [custom/ui-db-input (conj rf-sub-location-required :start-time)]]
+    [custom/field {:class "five wide"} "End Time"
+     [custom/ui-db-input (conj rf-sub-location-required :end-time)]]]])
+
+(defn add-field []
+  ;; TODO field name validation
+  [custom/field {:class "ui action input"}
+   nil
+   [custom/ui-input
+    {:placeholder "Add Field"
+     :onBlur      #(rf/dispatch [:add-slot/update-field-to-add (element-value %)])}]
+   [custom/ui-button
+    {:class   "ui icon button-icon"
+     :onClick #(rf/dispatch [:add-slot/add-optional-field])}
+    (f/ui-icon {:name icons/add-icon})]])
+
 (defn load []
   [:div#add-slot
    [:div.ui.segment
     [:form {:class "ui unstackable form"}
-
-     ;; first row
-     [:div.fields {:class "two"}
-      [custom/field {:class "ten wide"} "Main Label"
-       [custom/ui-search
-        {:default-value @(rf/subscribe [:add-slot/get-required-field :main-label])
-         :onBlur        #(rf/dispatch [:add-slot/update-required-field :main-label (element-value %)])}
-        (keys @(rf/subscribe [:db-get-field :main-labels]))]]
-      [custom/field {:class "six wide"} "Abbreviation"
-       [custom/ui-input
-        {:onBlur #(rf/dispatch [:add-slot/update-required-field :abbreviation (element-value %)])}]]]
-
-     ;; second row
-     [:div.fields {:class "three"}
-      [custom/field {:class "five wide"} "Start Time"
-       [custom/ui-input
-        {:onBlur #(rf/dispatch [:add-slot/update-required-field :start-time (element-value %)])}]]
-      [custom/field {:class "five wide"} "End Time"
-       [custom/ui-input
-        {:onBlur #(rf/dispatch [:add-slot/update-required-field :end-time (element-value %)])}]]
-      [custom/field {:class "six wide"} "Group"
-       [custom/ui-search
-        {:defaultValue @(rf/subscribe [:add-slot/get-required-field :group])
-         :onBlur       #(rf/dispatch [:add-slot/update-required-field :group (element-value %)])}
-        @(rf/subscribe [:db-get-field :groups])]]]
-
+     [load-required-fields]
      (f/ui-divider)
-
-     ;; Add fields
      [load-optional-fields (keys @(rf/subscribe [:add-slot/get-optional-fields]))]
-
      (f/ui-divider)
-
-     ;; TODO field name validation
-     [custom/field {:class "ui action input"}
-      nil
-      [custom/ui-input
-       {:placeholder "Add Field"
-        :onBlur      #(rf/dispatch [:add-slot/update-field-to-add (element-value %)])}]
-      [custom/ui-button
-       {:class   "ui icon button-icon"
-        :onClick #(rf/dispatch [:add-slot/add-optional-field])}
-       (f/ui-icon {:name icons/add-icon})]]
+     [add-field]
 
      ;; Finish
-     [custom/ui-button
-      {:class   "ui fluid button"
-       :onClick #(cljs.pprint/pprint @(rf/subscribe [:db-peek]))}
-      "Add Time Slot"]]]])
+     [:div.fields {:class "two"}
+      [custom/ui-button
+       {:class   "ui button field twelve wide"
+        :onClick #(cljs.pprint/pprint @(rf/subscribe [:db-peek]))}
+       "Add Time Slot"]
+      [custom/ui-button
+       {:class   "ui button field four wide"
+        :onClick #(rf/dispatch [:db-assoc-in rf-sub-location {}])}
+       "Clear All"]]
+
+     ]]])

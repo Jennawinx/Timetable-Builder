@@ -40,6 +40,20 @@
   (fn [db [_ field]]
     (get db field)))
 
+(rf/reg-sub
+  :db-get-in
+  (fn [db [_ location]]
+    (get-in db location)))
+
+(rf/reg-event-db
+  :db-assoc-in
+  (fn [db [_ location value]]
+    (assoc-in db location value)))
+
+(rf/reg-event-db
+  :db-update-in
+  (fn [db [_ location function & values]]
+    (apply (update-in db location function) values)))
 
 ;; ---------------- ADD SLOT ----------------
 
@@ -86,3 +100,8 @@
   :add-slot/get-optional-fields
   (fn [db _]
     (get-in db [:editor :add-slot :optional] {})))
+
+(rf/reg-sub
+  :add-slot/get-abbreviation
+  (fn [db _]
+    (get-in db [:main-labels (get-in db [:editor :add-slot :required :main-label])])))
