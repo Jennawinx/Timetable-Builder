@@ -7,9 +7,9 @@
     {
 
      ;; Auto-fill
-     :main-labels        #{}
+     :main-labels        {"hello" "hi"}
      :groups             #{"test1" "test2"}
-     :labels             #{}
+     :labels             #{"bye"}
 
      ;; styling
      ;:themes             {}
@@ -24,8 +24,9 @@
      :slots              {}
 
      ;; editor temp & rendering
-     :editor             {:add-slot {:required     {}
-                                     :optional     {"bugs" "hi"}
+     :editor             {:add-slot {:required     {:group "hi"}
+                                     :optional     {"bugs" "hi"
+                                                    "fish" "bye"}
                                      :field-to-add ""}}
      }))
 
@@ -47,6 +48,11 @@
   :add-slot/update-required-field
   (fn [db [_ field value]]
     (assoc-in db [:editor :add-slot :required field] value)))
+
+(rf/reg-sub
+  :add-slot/get-required-field
+  (fn [db [_ field]]
+    (get-in db [:editor :add-slot :required field])))
 
 (rf/reg-event-db
   :add-slot/update-optional-field

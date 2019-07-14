@@ -7,26 +7,6 @@
             [timetable-generater.utils :refer [element-value]]
             [reagent.core :as r]))
 
-(defn derive-key [label]
-  ;; lowercase, no space, no colons
-  )
-
-
-(defn examples []
-  (f/ui-button {:content       "Like"
-                :icon          icons/heart-icon             ; or just "heart"
-                :label         {:as "a" :basic true :content "2,048"}
-                :labelPosition "right"})
-  (f/ui-button-group nil
-                     (f/ui-button {:icon true}
-                                  (f/ui-icon {:name icons/align-left-icon}))
-                     (f/ui-button {:icon true}
-                                  (f/ui-icon {:name icons/align-center-icon}))
-                     (f/ui-button {:icon true}
-                                  (f/ui-icon {:name icons/align-right-icon}))
-                     (f/ui-button {:icon true}
-                                  (f/ui-icon {:name icons/align-justify-icon}))))
-
 (defn load-optional-field
   [field]
   [:div.fields {:class "two"}
@@ -34,9 +14,8 @@
     field nil]
    [custom/field {:class "ui action input ten wide"} nil
     [custom/ui-input
-     {:value    @(rf/subscribe [:add-slot/get-optional-field field])
-      :onChange #(rf/dispatch [:add-slot/update-optional-field field (element-value %)])}
-     nil]
+     {:defaultValue @(rf/subscribe [:add-slot/get-optional-field field])
+      :onBlur       #(rf/dispatch [:add-slot/update-optional-field field (element-value %)])}]
     [custom/ui-button
      {:class   "ui icon button-icon"
       :onClick #(println "delete me")}
@@ -48,8 +27,6 @@
        (map load-optional-field)
        (into [:div])))
 
-
-
 (defn load []
   [:div#add-slot
    [:div.ui.segment
@@ -58,8 +35,10 @@
      ;; first row
      [:div.fields {:class "two"}
       [custom/field {:class "ten wide"} "Main Label"
-       [custom/ui-input
-        {:onBlur #(rf/dispatch [:add-slot/update-required-field :main-label (element-value %)])}]]
+       [custom/ui-search
+        {:default-value @(rf/subscribe [:add-slot/get-required-field :main-label])
+         :onBlur        #(rf/dispatch [:add-slot/update-required-field :main-label (element-value %)])}
+        (keys @(rf/subscribe [:db-get-field :main-labels]))]]
       [custom/field {:class "six wide"} "Abbreviation"
        [custom/ui-input
         {:onBlur #(rf/dispatch [:add-slot/update-required-field :abbreviation (element-value %)])}]]]
@@ -74,7 +53,8 @@
         {:onBlur #(rf/dispatch [:add-slot/update-required-field :end-time (element-value %)])}]]
       [custom/field {:class "six wide"} "Group"
        [custom/ui-search
-        {:onBlur #(rf/dispatch [:add-slot/update-required-field :group (element-value %)])}
+        {:defaultValue @(rf/subscribe [:add-slot/get-required-field :group])
+         :onBlur       #(rf/dispatch [:add-slot/update-required-field :group (element-value %)])}
         @(rf/subscribe [:db-get-field :groups])]]]
 
      (f/ui-divider)
@@ -84,6 +64,7 @@
 
      (f/ui-divider)
 
+     ;; TODO field name validation
      [custom/field {:class "ui action input"}
       nil
       [custom/ui-input
