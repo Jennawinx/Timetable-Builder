@@ -7,30 +7,38 @@
             [timetable-generater.utils :refer [element-value]]
             [reagent.core :as r]))
 
+
 (def editor :add-slot)
 (def rf-sub-location [:editor editor])
 (def rf-sub-location-required (conj rf-sub-location :required))
 (def rf-sub-location-optional (conj rf-sub-location :optional))
 
 
+;; TODO Find out why inputbox values are not refreshing on db change
+
+
 (defn load-optional-field [field]
   [:div.fields {:class "two"}
    [custom/field {:class "four wide"} field]
    [custom/field {:class "ui action input sixteen wide"} nil
-    #_[custom/ui-db-input (conj rf-sub-location :optional field)]
     [custom/ui-input
-     {:defaultValue @(rf/subscribe [:add-slot/get-optional-field field])
-      :onBlur       #(rf/dispatch [:add-slot/update-optional-field field (element-value %)])}]
+     {;; NOTE Default value does not repaint
+      #_#_:defaultValue @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
+      :value        @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
+      :onChange     #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])
+      :onBlur       #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])}]
     [custom/ui-button
      {:class   "ui icon button-icon"
-      :onClick #(println "delete me")}
+      :onClick #(rf/dispatch [:db-update-in rf-sub-location-optional dissoc field])}
      (f/ui-icon {:name icons/trash-icon})]]])
+
 
 (defn load-optional-fields [fields]
   (->> fields
        sort
        (map load-optional-field)
        (into [:div])))
+
 
 (defn load-required-fields []
   [:div
@@ -41,33 +49,35 @@
     [custom/field {:class "three wide"} "Abbreviation"
      [custom/ui-db-input (conj rf-sub-location-required :abbreviation)
       ;; TODO do not use old subs
-      {:value    (or @(rf/subscribe [:add-slot/get-required-field :abbreviation])
+      {:value    (or @(rf/subscribe [:db-get-in (conj rf-sub-location-required :abbreviation)])
                      @(rf/subscribe [:add-slot/get-abbreviation])
-                     @(rf/subscribe [:add-slot/get-required-field :main-label]))
-       :onChange #(rf/dispatch [:add-slot/update-required-field :abbreviation (element-value %)])}]]
+                     @(rf/subscribe [:db-get-in (conj rf-sub-location-required :main-label)]))
+       :onChange #(rf/dispatch [:db-assoc-in (conj rf-sub-location-required :abbreviation) (element-value %)])}]]
     [custom/field {:class "five wide"} "Group"
      [custom/ui-db-search (conj rf-sub-location-required :group) @(rf/subscribe [:db-get-field :groups])]]]
 
    ;; second row
    [:div.fields {:class "three"}
     [custom/field {:class "six wide"} "Day/Section"
-     [custom/ui-db-input (conj rf-sub-location-required :end-time)]]
+     [custom/ui-db-input (conj rf-sub-location-required :column)]]
     [custom/field {:class "five wide"} "Start Time"
      [custom/ui-db-input (conj rf-sub-location-required :start-time)]]
     [custom/field {:class "five wide"} "End Time"
      [custom/ui-db-input (conj rf-sub-location-required :end-time)]]]])
 
+
 (defn add-field []
   ;; TODO field name validation
-  [custom/field {:class "ui action input"}
-   nil
-   [custom/ui-input
+  [custom/field {:class "ui action input"} ""
+   [custom/ui-search
     {:placeholder "Add Field"
-     :onBlur      #(rf/dispatch [:add-slot/update-field-to-add (element-value %)])}]
+     :onBlur      #(rf/dispatch [:add-slot/update-field-to-add (element-value %)])}
+    @(rf/subscribe [:db-get-field :labels])]
    [custom/ui-button
     {:class   "ui icon button-icon"
      :onClick #(rf/dispatch [:add-slot/add-optional-field])}
     (f/ui-icon {:name icons/add-icon})]])
+
 
 (defn load []
   [:div#add-slot
@@ -75,7 +85,7 @@
     [:form {:class "ui unstackable form"}
      [load-required-fields]
      (f/ui-divider)
-     [load-optional-fields (keys @(rf/subscribe [:add-slot/get-optional-fields]))]
+     [load-optional-fields (keys @(rf/subscribe [:db-get-in rf-sub-location-optional]))]
      (f/ui-divider)
      [add-field]
 
@@ -88,6 +98,4 @@
       [custom/ui-button
        {:class   "ui button field four wide"
         :onClick #(rf/dispatch [:db-assoc-in rf-sub-location {}])}
-       "Clear All"]]
-
-     ]]])
+       "Clear All"]]]]])
