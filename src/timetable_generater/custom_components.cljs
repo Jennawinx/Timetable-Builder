@@ -36,8 +36,8 @@
   [data-location config]
   [ui-input
    (merge
-     {:defaultValue @(rf/subscribe [:db-get-in data-location])
-      :onBlur       #(rf/dispatch [:db-assoc-in data-location (element-value %)])}
+     {:value    @(rf/subscribe [:db-get-in data-location])
+      :onChange #(rf/dispatch [:db-assoc-in data-location (element-value %)])}
      config)])
 
 ;; ------- ui search -------
