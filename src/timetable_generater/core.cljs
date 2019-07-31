@@ -3,7 +3,7 @@
     [reagent.core :as r]
     [re-frame.core :as rf]
     [timetable-generater.timetable :as timetable]
-    [timetable-generater.views.windows.add-slot :as add-slot]
+    [timetable-generater.views.add-data :as add-data]
     [timetable-generater.subscriptions]))
 
 ;; -------------------------
@@ -11,7 +11,7 @@
 
 (defn home-page []
   #_[timetable/load]
-  [add-slot/load])
+  [add-data/load])
 
 ;; -------------------------
 ;; Initialize app

@@ -14,7 +14,8 @@
 (def rf-sub-location-optional (conj rf-sub-location :optional))
 
 
-;; TODO Find out why inputbox values are not refreshing on db change
+;; TODO validate add-slot
+;; TODO add valid slots to db
 
 
 (defn load-optional-field [field]

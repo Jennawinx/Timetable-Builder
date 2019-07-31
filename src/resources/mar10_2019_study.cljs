@@ -29,7 +29,7 @@
                             :empty     "#DDD"}
            :display-days   [:mon :tue :wed :thu :other-days]
            :width          "86vh"
-           :height         "100vh"
+           :height         "100%"                           ;"100vh"
            :increment      1}
    :slots #{
             ; -----------------------------------------------------

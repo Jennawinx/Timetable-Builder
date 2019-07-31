@@ -21,7 +21,9 @@
    :table-views        {"default" {:display-days ["wednesday" "monday" "tuesday"]
                                    :width        "86vh"
                                    :height       "100vh"
-                                   :increment    1}}
+                                   :increment    1
+                                   :min-time     8
+                                   :max-time     20}}
 
    ;; active
    :current-cell-view  :default
