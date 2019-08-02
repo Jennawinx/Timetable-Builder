@@ -50,14 +50,12 @@
       [:div.time {:style (style-grid-block 0 time (+ time increment))}
        (str (t24->t12 time))])))
 
-
 (defn show-time-block [day-col slot]
   (let [{:keys [required optional]} slot
         {:keys [abbreviation main-label group start-time end-time]} required
         {:keys []} optional
         colour "white"                                      ;; Get group colour
         ]
-
     [:div.slot
      {:style (merge (style-grid-block day-col start-time end-time)
                     {:background-color colour})}
@@ -83,12 +81,13 @@
   (doall
     (for [[day slots] @(rf/subscribe [:db-get-field :slots])
           {:keys [conflict] :as slot} slots]
-      ^{:key required}
       (let [day-col (-> @(rf/subscribe [:db-get-in (conj table-view-location :display-days)])
                         (.indexOf day)
                         (get-colnum))]
         (if conflict
+          ^{:key slot}
           [show-conflicts day-col slot]
+          ^{:key slot}
           [show-time-block day-col slot])))))
 
 

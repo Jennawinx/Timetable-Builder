@@ -17,8 +17,6 @@
 
 ;; TODO validate add-slot
 ;; TODO add valid slots to db
-;; TODO type cast
-
 
 (defn load-optional-field [field]
   [:div.fields {:class "two"}
@@ -64,9 +62,9 @@
     [custom/field {:class "six wide"} "Day/Section"
      [custom/ui-db-search (conj rf-sub-location-required :column) days]]
     [custom/field {:class "five wide"} "Start Time"
-     [custom/ui-db-input (conj rf-sub-location-required :start-time) {:type "number" :min 0 :max 24 :step 1}]]
+     [custom/ui-db-input (conj rf-sub-location-required :start-time) {:type "number" :min 0 :max 24 :step 1 :cast :number}]]
     [custom/field {:class "five wide"} "End Time"
-     [custom/ui-db-input (conj rf-sub-location-required :end-time) {:type "number" :min 0 :max 24 :step 1}]]]])
+     [custom/ui-db-input (conj rf-sub-location-required :end-time) {:type "number" :min 0 :max 24 :step 1 :cast :number}]]]])
 
 
 (defn add-field []
@@ -99,7 +97,7 @@
         :onClick #(do
                     (cljs.pprint/pprint @(rf/subscribe [:db-peek]))
                     ;; TODO add-slot
-                    #_(rf/dispatch [assoc-in ]))}
+                    (rf/dispatch [:add-slot/add-slot]))}
        "Add Time Slot"]
       [custom/ui-button
        {:class   "ui button field four wide"

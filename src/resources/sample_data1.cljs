@@ -26,7 +26,9 @@
                                    :max-time     20}}
 
    ;; active
-   :current-cell-view  :default
+   ;; TODO
+   :current-cell-view  {"default" [:div
+                                   [:p "{%abbreviation%}"]]}
    :current-table-view :default
 
    ;; data
@@ -38,22 +40,22 @@
                                                :end-time     12}
                                     :optional {:type "lec"}}]
 
-                        "tuesday" [#_{:conflict true
-                                      ;:start-time 9                                                                              ;; ref # min items time (calculated on demand)
-                                      ;:end-time   11                                                                             ;; ref # max items time (calculated on demand)
-                                      :items    [{:required {:main-label   "CSCA08H3"
-                                                             :abbreviation "A08"
-                                                             :group        "CSCA08"
-                                                             :column       "tuesday"
-                                                             :start-time   9
-                                                             :end-time     10}
-                                                  :optional {:type "tut"}}
+                        "tuesday" [{:conflict true
+                                    :start-time 9                                                                              ;; ref # min items time (calculated on demand)
+                                    :end-time   11                                                                             ;; ref # max items time (calculated on demand)
+                                    :items    [{:required {:main-label   "CSCA08H3"
+                                                           :abbreviation "A08"
+                                                           :group        "CSCA08"
+                                                           :column       "tuesday"
+                                                           :start-time   9
+                                                           :end-time     10}
+                                                :optional {:type "tut"}}
 
-                                                 {:required {:main-label   "MATA31H3"
-                                                             :abbreviation "A31"
-                                                             :group        "MATA31"
-                                                             :column       "tuesday"
-                                                             :start-time   9
-                                                             :end-time     11}
-                                                  :optional {:type "lec"}}]}]}
+                                               {:required {:main-label   "MATA31H3"
+                                                           :abbreviation "A31"
+                                                           :group        "MATA31"
+                                                           :column       "tuesday"
+                                                           :start-time   9
+                                                           :end-time     11}
+                                                :optional {:type "lec"}}]}]}
    })

@@ -90,27 +90,6 @@
 
 ;; ---------------- ADD SLOT ----------------
 
-;
-;(rf/reg-event-db
-;  :add-slot/update-required-field
-;  (fn [db [_ field value]]
-;    (assoc-in db [:editor :add-slot :required field] value)))
-;
-;(rf/reg-sub
-;  :add-slot/get-required-field
-;  (fn [db [_ field]]
-;    (get-in db [:editor :add-slot :required field])))
-;
-;(rf/reg-event-db
-;  :add-slot/update-optional-field
-;  (fn [db [_ field value]]
-;    (assoc-in db [:editor :add-slot :optional field] value)))
-;
-;(rf/reg-sub
-;  :add-slot/get-optional-field
-;  (fn [db [_ field]]
-;    (get-in db [:editor :add-slot :optional field])))
-
 (rf/reg-sub
   :add-slot/get-field-to-add
   (fn [db [_ _]]
@@ -130,12 +109,16 @@
         db
         (assoc-in db [:editor :add-slot :optional field] "")))))
 
-;(rf/reg-sub
-;  :add-slot/get-optional-fields
-;  (fn [db _]
-;    (get-in db [:editor :add-slot :optional] {})))
-
 (rf/reg-sub
   :add-slot/get-abbreviation
   (fn [db _]
     (get-in db [:main-labels (get-in db [:editor :add-slot :required :main-label])])))
+
+(rf/reg-event-db
+  :add-slot/add-slot
+  (fn [db _]
+    (let [{{column :column} :required :as slot} (get-in db [:editor :add-slot])]
+      (println "adding to " column)
+      ;; TODO add ordered insertion here
+      ;; TODO add conflict logic here
+      (update-in db [:slots column] conj slot))))

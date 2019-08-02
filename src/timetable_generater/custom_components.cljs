@@ -11,6 +11,13 @@
 
 (def typeahead-value (reagent/atom nil))
 
+(defn cast [type s]
+  (if (s/blank? s)
+    ""
+    (case type
+      :number (js/parseInt s)
+      s)))
+
 (defn field
   ([label input]
    (field {} label input))
@@ -34,11 +41,13 @@
                   config)]])
 
 (defn ui-db-input
+  "If :cast is avaliable in config, will attempt to cast the string value"
   [data-location config]
   [ui-input
    (merge
      {:value    @(rf/subscribe [:db-get-in data-location])
-      :onChange #(rf/dispatch [:db-assoc-in data-location (element-value %)])}
+      :onChange #(rf/dispatch [:db-assoc-in data-location (element-value %)])
+      :onBlur   #(rf/dispatch [:db-assoc-in data-location (cast (:cast config) (element-value %))])}
      config)])
 
 ;; ------- ui search -------
@@ -56,7 +65,7 @@
   (.typeahead (js/$ (reagent/dom-node this))
               (clj->js {:hint      true
                         :highlight true
-                        :minLength 1})
+                        :minLength 0})
               (clj->js {:name   "states"
                         :source (match-search options)})))
 
