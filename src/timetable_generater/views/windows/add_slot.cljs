@@ -12,10 +12,12 @@
 (def rf-sub-location [:editor editor])
 (def rf-sub-location-required (conj rf-sub-location :required))
 (def rf-sub-location-optional (conj rf-sub-location :optional))
-
+(def days #{"monday" "tuesday" "wednesday" "thursday" "friday" "saturday" "sunday"
+            "mon" "tue" "wed" "thu" "fri" "sat" "sun"})
 
 ;; TODO validate add-slot
 ;; TODO add valid slots to db
+;; TODO type cast
 
 
 (defn load-optional-field [field]
@@ -25,9 +27,9 @@
     [custom/ui-input
      {;; NOTE Default value does not repaint
       #_#_:defaultValue @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
-      :value        @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
-      :onChange     #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])
-      :onBlur       #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])}]
+      :value    @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
+      :onChange #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])
+      :onBlur   #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])}]
     [custom/ui-button
      {:class   "ui icon button-icon"
       :onClick #(rf/dispatch [:db-update-in rf-sub-location-optional dissoc field])}
@@ -60,11 +62,11 @@
    ;; second row
    [:div.fields {:class "three"}
     [custom/field {:class "six wide"} "Day/Section"
-     [custom/ui-db-input (conj rf-sub-location-required :column)]]
+     [custom/ui-db-search (conj rf-sub-location-required :column) days]]
     [custom/field {:class "five wide"} "Start Time"
-     [custom/ui-db-input (conj rf-sub-location-required :start-time)]]
+     [custom/ui-db-input (conj rf-sub-location-required :start-time) {:type "number" :min 0 :max 24 :step 1}]]
     [custom/field {:class "five wide"} "End Time"
-     [custom/ui-db-input (conj rf-sub-location-required :end-time)]]]])
+     [custom/ui-db-input (conj rf-sub-location-required :end-time) {:type "number" :min 0 :max 24 :step 1}]]]])
 
 
 (defn add-field []
@@ -94,7 +96,10 @@
      [:div.fields {:class "two"}
       [custom/ui-button
        {:class   "ui button field twelve wide"
-        :onClick #(cljs.pprint/pprint @(rf/subscribe [:db-peek]))}
+        :onClick #(do
+                    (cljs.pprint/pprint @(rf/subscribe [:db-peek]))
+                    ;; TODO add-slot
+                    #_(rf/dispatch [assoc-in ]))}
        "Add Time Slot"]
       [custom/ui-button
        {:class   "ui button field four wide"

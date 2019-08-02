@@ -30,7 +30,8 @@
 (defn ui-input
   [config]
   [:div.ui.input
-   [:input (assoc config :type :text)]])
+   [:input (merge {:type :text}
+                  config)]])
 
 (defn ui-db-input
   [data-location config]

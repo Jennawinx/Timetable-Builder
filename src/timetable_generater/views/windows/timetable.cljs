@@ -5,82 +5,108 @@
     [clojure.string :as s])
   (:use [resources.mar10-2019-study :only (test-table)]))
 
-;; TDDO fix grid logic
+;; TODO fix grid logic
+;; grid indices starts at 1
+;; TODO pull out start-time?
 
-(def hr-divions 4)                                          ; slot accuracy
+(def table-view-location [:table-views "default"])
+(def hr-divions 4)                                          ; slot accuracy TODO this should not be manual
 
 (defn t24->t12 [time]
   (let [x (mod time 12)]
     (if (= x 0) 12 x)))
 
-(defn get-rownum [start-time hr]
-  (-> hr
-      (- start-time)
-      (* hr-divions)
-      (+ 2)))
+(defn get-rownum [hr]
+  (let [start-time @(rf/subscribe [:db-get-in (conj table-view-location :min-time)])]
+    (-> hr
+        (- start-time)                                      ;; calculate the time interval
+        (* hr-divions)                                      ;; the division accuracy
+        (inc)                                               ;; finish time is inclusive
+        (inc)))                                             ;; B/C Grid counts at 1
+  )
 
 (defn get-colnum [colnum]
-  (inc colnum))
+  (inc colnum)                                              ;; B/C Grid counts at 1
+  )
+
+
+(defn style-grid-block [column-start row-start row-end]
+  {:grid-column-start (get-colnum column-start)
+   :grid-column-end   (get-colnum (inc column-start))
+   :grid-row-start    (get-rownum row-start)
+   :grid-row-end      (get-rownum row-end)})
+
 
 (defn table-headers [headers]
   (for [header (into [""] headers)]
     ^{:key header}
     [:div.day header]))
 
+
 (defn time-labels [start-time end-time increment]
-  (for [time (range start-time (inc end-time) increment)]
-    ^{:key time}
-    [:div.time
-     {:style {:grid-column-start (get-colnum 0)
-              :grid-column-end   (get-colnum (inc 0))
-              :grid-row-start    (get-rownum start-time time)
-              :grid-row-end      (get-rownum start-time (+ time increment))}}
-     (str (t24->t12 time))]))
+  (doall
+    (for [time (range start-time (inc end-time) increment)]
+      ^{:key time}
+      [:div.time {:style (style-grid-block 0 time (+ time increment))}
+       (str (t24->t12 time))])))
+
+
+(defn show-time-block [day-col slot]
+  (let [{:keys [required optional]} slot
+        {:keys [abbreviation main-label group start-time end-time]} required
+        {:keys []} optional
+        colour "white"                                      ;; Get group colour
+        ]
+
+    [:div.slot
+     {:style (merge (style-grid-block day-col start-time end-time)
+                    {:background-color colour})}
+     [:div.info.va-middle
+      ;; TODO Show required info
+      [:div
+       [:span.slot-title abbreviation]]
+      ;; TODO Show optional info
+      ]]))
+
+
+(defn show-conflicts [day-col slot]
+  (let [{:keys [start-time end-time]} slot
+        colour "red"]
+    [:div.slot
+     {:style (merge (style-grid-block day-col start-time end-time)
+                    {:background-color colour})}
+     [:div.info.va-middle
+      [:div "Conflict!!!"]]]))
+
+
+(defn entries []
+  (doall
+    (for [[day slots] @(rf/subscribe [:db-get-field :slots])
+          {:keys [conflict] :as slot} slots]
+      ^{:key required}
+      (let [day-col (-> @(rf/subscribe [:db-get-in (conj table-view-location :display-days)])
+                        (.indexOf day)
+                        (get-colnum))]
+        (if conflict
+          [show-conflicts day-col slot]
+          [show-time-block day-col slot])))))
+
 
 (defn load [& [config]]
   [:div#table-view config
-   (println @(rf/subscribe [:db-get-in [:table-views "default"]]))
-   (if-let [table-config @(rf/subscribe [:db-get-in [:table-views "default"]])]
+   (println @(rf/subscribe [:db-get-in table-view-location]))
+   (if-let [table-config @(rf/subscribe [:db-get-in table-view-location])]
      (let [{:keys [display-days width height increment min-time max-time]} table-config
-           course-colours "white"
-
-           day-cols       (count display-days)
            min-start-time min-time
-           max-end-time   max-time
-           _              (println display-days width height increment min-time max-time)]
-
+           max-end-time   max-time]
        [:div.table
         {:style {:display               :grid
-                 :grid-template-columns (str "5ch repeat(" (dec (get-colnum day-cols)) ", 1fr")
-                 :grid-template-rows    (str "2em repeat(" (dec (get-rownum min-start-time max-end-time)) ", 1fr")
+                 :grid-template-columns (str "5ch repeat(" (count display-days) ", 1fr")
+                 :grid-template-rows    (str "2em repeat(" (get-rownum max-end-time) ", 1fr")
                  :width                 width
                  :height                height
                  :margin                :inherit}}
-
         (table-headers display-days)
         (time-labels min-start-time max-end-time increment)
-
-        #_(for [slot slots]
-            ^{:key slot}
-            (let [{:keys [short-name type no room desc end-time course-code day-of-week start-time]} slot
-                  colour (or (get course-colours course-code) (get course-colours :default))
-                  daynum (-> (.indexOf display-days day-of-week) (inc))
-                  _      (println short-name)]
-              [:div.slot
-               {:style {:grid-column-start (get-colnum daynum)
-                        :grid-column-end   (get-colnum (inc daynum))
-                        :grid-row-start    (get-rownum min-start-time start-time)
-                        :grid-row-end      (get-rownum min-start-time end-time)
-                        :background-color  colour}}
-               [:div.info.va-middle
-                [:div
-                 [:span.slot-title short-name]
-                 [:span.slot-title.course-type (when-not (nil? type)
-                                                 (str " " (s/upper-case (name type))))]
-                 [:span.slot-title.course-type " " no]]
-                [:div.room room]
-                (when-not (nil? desc)
-                  [:div.desc {:class (when-not (nil? short-name) "border-top")}
-                   (interpose [:br] (clojure.string/split-lines desc))])]]))
-        ])
+        (entries)])
      [:div])])

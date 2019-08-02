@@ -28,7 +28,33 @@
      :current-table-view :default
 
      ;; data
-     :slots              {}
+     :slots              #_{}
+                         {"monday"  [{:required {:main-label   "CSCA08"
+                                                 :abbreviation "A08"
+                                                 :group        "CSCA08"
+                                                 :column       "monday"
+                                                 :start-time   10
+                                                 :end-time     12}
+                                      :optional {:type "lec"}}]
+
+                          "tuesday" [{:conflict true
+                                      :start-time 9                                                                              ;; ref # min items time (calculated on demand)
+                                      :end-time   11                                                                             ;; ref # max items time (calculated on demand)
+                                      :items    [{:required {:main-label   "CSCA08H3"
+                                                             :abbreviation "A08"
+                                                             :group        "CSCA08"
+                                                             :column       "tuesday"
+                                                             :start-time   9
+                                                             :end-time     10}
+                                                  :optional {:type "tut"}}
+
+                                                 {:required {:main-label   "MATA31H3"
+                                                             :abbreviation "A31"
+                                                             :group        "MATA31"
+                                                             :column       "tuesday"
+                                                             :start-time   9
+                                                             :end-time     11}
+                                                  :optional {:type "lec"}}]}]}
 
      ;; editor temp & rendering
      :editor             {:add-slot {:required     {:group "hi"}
