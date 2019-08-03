@@ -29,37 +29,37 @@
 
      ;; data
      :slots              #_{}
-                         {"monday"  [{:required {:main-label   "CSCA08"
-                                                 :abbreviation "A08"
-                                                 :group        "CSCA08"
-                                                 :column       "monday"
-                                                 :start-time   10
-                                                 :end-time     12}
-                                      :optional {:type "lec"}}]
+                         {"monday"  [{:main-label   "CSCA08"
+                                      :abbreviation "A08"
+                                      :group        "CSCA08"
+                                      :column       "monday"
+                                      :start-time   10
+                                      :end-time     12
+                                      :optional     {:type "lec"}}]
 
-                          "tuesday" [{:conflict true
-                                      :start-time 9                                                                              ;; ref # min items time (calculated on demand)
-                                      :end-time   11                                                                             ;; ref # max items time (calculated on demand)
-                                      :items    [{:required {:main-label   "CSCA08H3"
-                                                             :abbreviation "A08"
-                                                             :group        "CSCA08"
-                                                             :column       "tuesday"
-                                                             :start-time   9
-                                                             :end-time     10}
-                                                  :optional {:type "tut"}}
+                          "tuesday" [{:conflict   true
+                                      :start-time 9
+                                      :end-time   11
+                                      :items      [{:main-label   "CSCA08H3"
+                                                    :abbreviation "A08"
+                                                    :group        "CSCA08"
+                                                    :column       "tuesday"
+                                                    :start-time   9
+                                                    :end-time     10
+                                                    :optional     {:type "tut"}}
 
-                                                 {:required {:main-label   "MATA31H3"
-                                                             :abbreviation "A31"
-                                                             :group        "MATA31"
-                                                             :column       "tuesday"
-                                                             :start-time   9
-                                                             :end-time     11}
-                                                  :optional {:type "lec"}}]}]}
+                                                   {:main-label   "MATA31H3"
+                                                    :abbreviation "A31"
+                                                    :group        "MATA31"
+                                                    :column       "tuesday"
+                                                    :start-time   9
+                                                    :end-time     11
+                                                    :optional     {:type "lec"}}]}]}
 
      ;; editor temp & rendering
-     :editor             {:add-slot {:required     {:group "hi"}
-                                     :optional     {"bugs" "hi"
-                                                    "fish" "bye"}
+     :editor             {:add-slot {:data         {:group    "hi"
+                                                    :optional {"bugs" "hi"
+                                                               "fish" "bye"}}
                                      :field-to-add ""}}
      }))
 
@@ -107,17 +107,17 @@
       ;; TODO do not have check here
       (if (= (clojure.string/trim field) "")
         db
-        (assoc-in db [:editor :add-slot :optional field] "")))))
+        (assoc-in db [:editor :add-slot :data :optional field] "")))))
 
 (rf/reg-sub
   :add-slot/get-abbreviation
   (fn [db _]
-    (get-in db [:main-labels (get-in db [:editor :add-slot :required :main-label])])))
+    (get-in db [:main-labels (get-in db [:editor :add-slot :data :main-label])])))
 
 (rf/reg-event-db
   :add-slot/add-slot
   (fn [db _]
-    (let [{{column :column} :required :as slot} (get-in db [:editor :add-slot])]
+    (let [{column :column :as slot} (get-in db [:editor :add-slot :data])]
       (println "adding to " column)
       ;; TODO add ordered insertion here
       ;; TODO add conflict logic here

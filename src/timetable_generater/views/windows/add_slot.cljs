@@ -10,8 +10,9 @@
 
 (def editor :add-slot)
 (def rf-sub-location [:editor editor])
-(def rf-sub-location-required (conj rf-sub-location :required))
-(def rf-sub-location-optional (conj rf-sub-location :optional))
+(def rf-sub-location-data (conj rf-sub-location :data))
+(def rf-sub-location-required rf-sub-location-data)
+(def rf-sub-location-optional (conj rf-sub-location-data :optional))
 (def days #{"monday" "tuesday" "wednesday" "thursday" "friday" "saturday" "sunday"
             "mon" "tue" "wed" "thu" "fri" "sat" "sun"})
 
@@ -22,12 +23,7 @@
   [:div.fields {:class "two"}
    [custom/field {:class "four wide"} field]
    [custom/field {:class "ui action input sixteen wide"} nil
-    [custom/ui-input
-     {;; NOTE Default value does not repaint
-      #_#_:defaultValue @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
-      :value    @(rf/subscribe [:db-get-in (conj rf-sub-location-optional field)])
-      :onChange #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])
-      :onBlur   #(rf/dispatch [:db-assoc-in (conj rf-sub-location-optional field) (element-value %)])}]
+    [custom/ui-db-input (conj rf-sub-location-optional field)]
     [custom/ui-button
      {:class   "ui icon button-icon"
       :onClick #(rf/dispatch [:db-update-in rf-sub-location-optional dissoc field])}

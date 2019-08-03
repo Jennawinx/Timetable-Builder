@@ -51,8 +51,7 @@
        (str (t24->t12 time))])))
 
 (defn show-time-block [day-col slot]
-  (let [{:keys [required optional]} slot
-        {:keys [abbreviation main-label group start-time end-time]} required
+  (let [{:keys [abbreviation main-label group start-time end-time optional]} slot
         {:keys []} optional
         colour "white"                                      ;; Get group colour
         ]
@@ -95,17 +94,15 @@
   [:div#table-view config
    (println @(rf/subscribe [:db-get-in table-view-location]))
    (if-let [table-config @(rf/subscribe [:db-get-in table-view-location])]
-     (let [{:keys [display-days width height increment min-time max-time]} table-config
-           min-start-time min-time
-           max-end-time   max-time]
+     (let [{:keys [display-days width height increment min-time max-time]} table-config]
        [:div.table
         {:style {:display               :grid
                  :grid-template-columns (str "5ch repeat(" (count display-days) ", 1fr")
-                 :grid-template-rows    (str "2em repeat(" (get-rownum max-end-time) ", 1fr")
+                 :grid-template-rows    (str "2em repeat(" (get-rownum max-time) ", 1fr")
                  :width                 width
                  :height                height
                  :margin                :inherit}}
         (table-headers display-days)
-        (time-labels min-start-time max-end-time increment)
+        (time-labels min-time max-time increment)
         (entries)])
      [:div])])
