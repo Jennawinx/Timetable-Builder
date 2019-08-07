@@ -2,7 +2,8 @@
   (:require
     [re-frame.core :as rf]
     [timetable-generater.subscriptions]
-    [clojure.string :as s])
+    [clojure.string :as s]
+    [timetable-generater.utils :as utils])
   (:use [resources.mar10-2019-study :only (test-table)]))
 
 ;; TODO fix grid logic
@@ -10,7 +11,10 @@
 ;; TODO pull out start-time?
 
 (def table-view-location [:table-views "default"])
+(def group-colours [:themes "default" :groups])
+(def cell-view [:cell-views "default"])
 (def hr-divions 4)                                          ; slot accuracy TODO this should not be manual
+(def template-ignore-keys [:optional :template])
 
 (defn t24->t12 [time]
   (let [x (mod time 12)]
@@ -50,40 +54,63 @@
       [:div.time {:style (style-grid-block 0 time (+ time increment))}
        (str (t24->t12 time))])))
 
+
+(defn time-slot-cell [parent-start parent-end {:keys [start-time end-time optional group] :as slot}]
+  (let [data (merge (apply (partial dissoc slot) template-ignore-keys)
+                    optional)]
+    (println (utils/fill-template @(rf/subscribe [:db-get-in cell-view]) data))
+    [:div.slot.info {:style {:background-color @(rf/subscribe [:db-get-in (conj group-colours group)])
+                             :width            "100%"
+                             :height           (-> (/ (- end-time start-time)
+                                                      (- parent-end parent-start))
+                                                   (* 100)
+                                                   (int)
+                                                   (str "%"))}}
+     (utils/fill-template @(rf/subscribe [:db-get-in cell-view]) data)]))
+
+
 (defn show-time-block [day-col slot]
-  (let [{:keys [abbreviation main-label group start-time end-time optional]} slot
-        {:keys []} optional
-        colour "white"                                      ;; Get group colour
-        ]
-    [:div.slot
-     {:style (merge (style-grid-block day-col start-time end-time)
-                    {:background-color colour})}
-     [:div.info.va-middle
-      ;; TODO Show required info
-      [:div
-       [:span.slot-title abbreviation]]
-      ;; TODO Show optional info
-      ]]))
+  (let [{:keys [start-time end-time optional]} slot]
+    [:div {:style (style-grid-block day-col start-time end-time)}
+     [time-slot-cell start-time end-time slot]]))
+
+
+(defn time-cell-summary [{:keys [start-time end-time abbreviation group]}]
+  [:div.slot.info {:style {:background-color @(rf/subscribe [:db-get-in (conj group-colours group)])
+                           :width            "100%"
+                           :font-size        "1em"}}
+   [:div {:style {:display         :flex
+                  :justify-content :space-between}}
+    [:div abbreviation] [:div start-time "-" end-time]]])
 
 
 (defn show-conflicts [day-col slot]
-  (let [{:keys [start-time end-time]} slot
+  (let [{:keys [start-time end-time items]} slot
         colour "red"]
-    [:div.slot
-     {:style (merge (style-grid-block day-col start-time end-time)
-                    {:background-color colour})}
-     [:div.info.va-middle
-      [:div "Conflict!!!"]]]))
+    [:div {:style (style-grid-block day-col start-time end-time)}
+     (if (= (count items) 2)
+       [:div {:style {:display         :flex
+                      :justify-content :flex-start
+                      :height          "100%"}}
+        [time-slot-cell start-time end-time (first items)]
+        [time-slot-cell start-time end-time (second items)]]
+       (conj
+         [:div.slot.info {:style {:background-color "rgba(255, 80, 80, 0.8)"
+                                  :width            "100%"
+                                  :height           "100%"}}
+          [:div {:style {:margin-bottom "0.5em"}}
+           "Conflict"]]
+         (map time-cell-summary items)))]))
 
 
 (defn entries []
   (doall
     (for [[day slots] @(rf/subscribe [:db-get-field :slots])
-          {:keys [conflict] :as slot} slots]
+          {:keys [conflict?] :as slot} slots]
       (let [day-col (-> @(rf/subscribe [:db-get-in (conj table-view-location :display-days)])
                         (.indexOf day)
                         (get-colnum))]
-        (if conflict
+        (if conflict?
           ^{:key slot}
           [show-conflicts day-col slot]
           ^{:key slot}
@@ -92,7 +119,7 @@
 
 (defn load [& [config]]
   [:div#table-view config
-   (println @(rf/subscribe [:db-get-in table-view-location]))
+   #_(println @(rf/subscribe [:db-get-in table-view-location]))
    (if-let [table-config @(rf/subscribe [:db-get-in table-view-location])]
      (let [{:keys [display-days width height increment min-time max-time]} table-config]
        [:div.table

@@ -48,8 +48,7 @@
       ;; TODO do not use old subs
       {:value    (or @(rf/subscribe [:db-get-in (conj rf-sub-location-required :abbreviation)])
                      @(rf/subscribe [:add-slot/get-abbreviation])
-                     @(rf/subscribe [:db-get-in (conj rf-sub-location-required :main-label)]))
-       :onChange #(rf/dispatch [:db-assoc-in (conj rf-sub-location-required :abbreviation) (element-value %)])}]]
+                     @(rf/subscribe [:db-get-in (conj rf-sub-location-required :main-label)]))}]]
     [custom/field {:class "five wide"} "Group"
      [custom/ui-db-search (conj rf-sub-location-required :group) @(rf/subscribe [:db-get-field :groups])]]]
 
@@ -85,17 +84,17 @@
      [load-optional-fields (keys @(rf/subscribe [:db-get-in rf-sub-location-optional]))]
      (f/ui-divider)
      [add-field]
-
      ;; Finish
      [:div.fields {:class "two"}
       [custom/ui-button
        {:class   "ui button field twelve wide"
-        :onClick #(do
-                    (cljs.pprint/pprint @(rf/subscribe [:db-peek]))
-                    ;; TODO add-slot
-                    (rf/dispatch [:add-slot/add-slot]))}
+        :onClick #(rf/dispatch [:add-slot/add-slot])}
        "Add Time Slot"]
       [custom/ui-button
        {:class   "ui button field four wide"
         :onClick #(rf/dispatch [:db-assoc-in rf-sub-location {}])}
-       "Clear All"]]]]])
+       "Clear All"]
+      [custom/ui-button
+       {:class   "ui button field one wide"
+        :onClick #(cljs.pprint/pprint @(rf/subscribe [:db-peek]))}
+       "Peek"]]]]])

@@ -1,7 +1,10 @@
-(ns timetable-generater.utils)
+(ns timetable-generater.utils
+  (:require [clojure.string :as str]))
+
 
 (defn element-value [e]
   (.. e -target -value))
+
 
 (defn string-injection
   "Replaces {%variable%} in strings with it's corresponding value given in var->str
@@ -9,13 +12,14 @@
   [s var->str]
   (reduce
     (fn [new_s tagged-variable]
-      (let [variable (re-find #"(?<=\{%).*?(?=%\})" tagged-variable)]
+      (let [variable (subs tagged-variable 2 (- (count tagged-variable) 2))]
         (->> (or (get var->str variable)
                  (get var->str (keyword variable)))
              (str)
-             (clojure.string/replace new_s tagged-variable))))
+             (str/replace new_s tagged-variable))))
     s
     (re-seq #"\{%.*?%\}" s)))
+
 
 (defn fill-template
   "Template is a hiccup datastructure
@@ -59,7 +63,7 @@
   result of the applied function is :break
 
   the given function 'inner-fn' takes form of (fn [result this next] ...)
-  and returns a value or :break which stops the next consumption
+  and returns a value or {:break! value} which stops the next consumption and returns value
   if 'coll' has less than 2 values, reduce-lazy-lookahead returns the given 'value'
 
   Example: Sum all consecutive even pairs
@@ -84,12 +88,13 @@
         (if (= 0 result)
           (+ result this next)
           (+ result next))
-        :break))
+        {:break! result}))
     0
     [6 2 2 8 3 4 5 4 2 4])
   =>
   18
   "
+  ;; TODO change to loop and recur
   ([inner-fn value coll]
    (reduce-lazy-lookahead inner-fn value (first coll) (rest coll)))
   ([inner-fn result this coll]
@@ -98,6 +103,6 @@
      (let [nxt      (first coll)
            the-rest (rest coll)
            value    (inner-fn result this nxt)]
-       (if (= value :break)
-         result
+       (if (and (map? value) (some? (:break! value)))
+         (:break! value)
          (reduce-lazy-lookahead inner-fn value nxt the-rest))))))
