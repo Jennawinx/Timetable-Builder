@@ -29,16 +29,28 @@
     transform: translateY(-1em);
 }
 
-.slot {
+.slot-container {
     border: 1pt solid black;
     border-radius: 0.25em;
+    width: 100%;
+}
+
+.slot {
+    border-radius: 0.25em;
+    padding: 0.5em 0.4em;
+    height: 100%;
+}
+
+.conflict-container {
+    border-left: 0.5em solid #b3acac;
+    border-right: 0.5em solid #b3acac;
+    width:       100%;
+    padding: 0;
 }
 
 .info {
     font-size: 150%;
     text-align: center;
-    height: 100%;
-    padding: 0.5em 0.4em;
 }
 
 .slot-title {

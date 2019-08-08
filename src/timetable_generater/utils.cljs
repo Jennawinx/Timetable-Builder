@@ -125,3 +125,6 @@
       (* 100)
       (int)
       (str "%")))
+
+(defn fill-br [str]
+  (interpose [:br] (clojure.string/split-lines str)))

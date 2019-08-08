@@ -58,9 +58,8 @@
 (defn time-slot-cell [parent-start parent-end {:keys [start-time end-time optional group] :as slot}]
   (let [data (merge (apply (partial dissoc slot) template-ignore-keys)
                     optional)]
-    [:div.slot
+    [:div.slot-container
      {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
-              :width            "100%"
               :margin-top       (utils/decimal->str-percent (/ (- start-time parent-start)
                                                                (- parent-end parent-start)))
               :height           (utils/decimal->str-percent (/ (- end-time start-time)
@@ -75,18 +74,17 @@
 
 
 (defn time-cell-summary [{:keys [start-time end-time abbreviation group]}]
-  [:div.slot {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
-                      :width            "100%"
-                      :font-size        "1em"}}
-   [:div {:style {:display         :flex
-                  :justify-content :space-between}}
+  [:div {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
+                                :width            "100%"
+                                :font-size        "1em"}}
+   [:div.slot {:style {:display         :flex
+                       :justify-content :space-between}}
     [:div abbreviation] [:div start-time "-" end-time]]])
 
 
 (defn show-conflicts [day-col slot]
-  (let [{:keys [start-time end-time items]} slot
-        colour "red"]
-    [:div {:style (style-grid-block day-col start-time end-time)}
+  (let [{:keys [start-time end-time items]} slot]
+    [:div.slot {:style (style-grid-block day-col start-time end-time)}
      (if (= (count items) 2)
        [:div {:style {:display         :flex
                       :justify-content :flex-start
@@ -94,11 +92,7 @@
         [time-slot-cell start-time end-time (first items)]
         [time-slot-cell start-time end-time (second items)]]
        (conj
-         [:div.slot.info {:style {:background-color "rgba(255, 80, 80, 0.8)"
-                                  :width            "100%"
-                                  :height           "100%"}}
-          [:div {:style {:margin-bottom "0.5em"}}
-           "Conflict"]]
+         [:div.slot.conflict-container {:style {:height "100%"}}]
          (map time-cell-summary items)))]))
 
 

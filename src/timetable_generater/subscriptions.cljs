@@ -7,6 +7,8 @@
   (fn [_ _]
     {
 
+     ;; ----------------------------------------- Replacable Here ---------------------------------------
+
      ;; Auto-fill
      :main-labels        {"Intro to Comp Sci 1" "CSCA08"
                           "Calc 1"              "MATA31H3"
@@ -19,8 +21,11 @@
                                               "MATA31" "teal"}}}
 
      :cell-views         {"default" [:div.slot.info
-                                     [:div "{%abbreviation%}"]
-                                     [:div "{%type%}"]]}
+                                     [:div {:style {:font-weight :bold
+                                                    :text-transform :uppercase}}
+                                      "{%abbreviation%} {%type%} {%number%}"]
+                                     [:div {:style {:text-transform :uppercase}}
+                                      "{%room%}"]]}
 
      :table-views        {"default" {:display-days ["wednesday" "monday" "tuesday"]
                                      :width        "86vh"
@@ -29,13 +34,8 @@
                                      :min-time     8
                                      :max-time     20}}
 
-     ;; active
-     :current-theme      "default"
-     :current-table-view "default"
-
      ;; data
-     :slots              #_{}
-                         {"monday"  [{:main-label   "Intro to Comp Sci 1"
+     :slots              {"monday"  [{:main-label   "Intro to Comp Sci 1"
                                       :abbreviation "CSCA08"
                                       :group        "CSCA08"
                                       :column       "monday"
@@ -61,6 +61,12 @@
                                                     :start-time   9
                                                     :end-time     11
                                                     :optional     {:type "lec"}}]}]}
+
+     ;; ----------------------------------------- Replacable Here ---------------------------------------
+
+     ;; active
+     :current-theme      "default"
+     :current-table-view "default"
 
      ;; editor temp & rendering
      :editor             {:add-slot {:data         {:group    "hi"
