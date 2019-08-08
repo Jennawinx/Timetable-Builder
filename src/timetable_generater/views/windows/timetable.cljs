@@ -58,14 +58,13 @@
 (defn time-slot-cell [parent-start parent-end {:keys [start-time end-time optional group] :as slot}]
   (let [data (merge (apply (partial dissoc slot) template-ignore-keys)
                     optional)]
-    (println (utils/fill-template @(rf/subscribe [:db-get-in cell-view]) data))
-    [:div.slot.info {:style {:background-color @(rf/subscribe [:db-get-in (conj group-colours group)])
-                             :width            "100%"
-                             :height           (-> (/ (- end-time start-time)
-                                                      (- parent-end parent-start))
-                                                   (* 100)
-                                                   (int)
-                                                   (str "%"))}}
+    [:div.slot
+     {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
+              :width            "100%"
+              :margin-top       (utils/decimal->str-percent (/ (- start-time parent-start)
+                                                               (- parent-end parent-start)))
+              :height           (utils/decimal->str-percent (/ (- end-time start-time)
+                                                               (- parent-end parent-start)))}}
      (utils/fill-template @(rf/subscribe [:db-get-in cell-view]) data)]))
 
 
@@ -76,9 +75,9 @@
 
 
 (defn time-cell-summary [{:keys [start-time end-time abbreviation group]}]
-  [:div.slot.info {:style {:background-color @(rf/subscribe [:db-get-in (conj group-colours group)])
-                           :width            "100%"
-                           :font-size        "1em"}}
+  [:div.slot {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
+                      :width            "100%"
+                      :font-size        "1em"}}
    [:div {:style {:display         :flex
                   :justify-content :space-between}}
     [:div abbreviation] [:div start-time "-" end-time]]])

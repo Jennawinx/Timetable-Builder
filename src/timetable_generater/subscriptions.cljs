@@ -18,7 +18,7 @@
      :themes             {"default" {:groups {"CSCA08" "skyblue"
                                               "MATA31" "teal"}}}
 
-     :cell-views         {"default" [:div
+     :cell-views         {"default" [:div.slot.info
                                      [:div "{%abbreviation%}"]
                                      [:div "{%type%}"]]}
 

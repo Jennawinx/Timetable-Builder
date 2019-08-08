@@ -7,6 +7,7 @@
       (and (< s2 s1) (< s1 e2)))                            ;; first overlaps tail of second
   )
 
+
 (defn time-order
   "1 before
   0 conflict
@@ -23,70 +24,80 @@
        -1)
      :else 0)))
 
-(defn update-conflict [{:keys [start-time end-time conflict? items] :as conflict}
-                       {new-slot-start :start-time new-slot-end :end-time :as new-slot}]
-  {:conflict?  true
-   :start-time (min start-time new-slot-start)
-   :end-time   (max end-time new-slot-end)
-   :items      (if conflict?
-                 (conj items new-slot)
-                 [conflict new-slot])})
 
-(declare insert-slot-to-column)
+(defn update-conflict [{:keys [start-time end-time conflict? items] :as slot1}
+                       {s2         :start-time
+                        e2         :end-time
+                        conflict2? :conflict?
+                        items2     :items
+                        :as        slot2}]
+  {:conflict?  true
+   :start-time (min start-time s2)
+   :end-time   (max end-time e2)
+   :items      (cond (and conflict? conflict2?)
+                     (concat items items2)
+
+                     conflict?
+                     (conj items slot2)
+
+                     conflict2?
+                     (conj items2 slot1)
+
+                     :else
+                     [slot1 slot2])})
+
 
 (defn insert-slot [{new-slot-start :start-time new-slot-end :end-time :as new-slot}]
-  ;; TODO ERRORS Tail Conflicts Can Clash with more than 1
-  ;; TODO algorithm tweaks, rather than positive lookahead, should lookbehind instead and combine conflicts, no short circuiting
-  (fn [result
-       {s1 :start-time e1 :end-time :as slot1}
+  (fn [[inserted? result {s1 :start-time e1 :end-time :as slot1}]
        {s2 :start-time e2 :end-time :as slot2}]
-    (let [order-with-first  (time-order [new-slot-start new-slot-end] [s1 e1])
-          order-with-second (time-order [new-slot-start new-slot-end] [s2 e2])
-          new-result        (->> (case order-with-first
-                                   ;; n < a < b
-                                   1 [new-slot slot1 slot2]
+    (cond (nil? slot1)
+          [false [] slot2]
 
-                                   ;; a~n
-                                   0 (case order-with-second
-                                       ;; a~n < b
-                                       1 [(update-conflict slot1 new-slot) slot2]
-                                       ;; a~n~b
-                                       0 (-> (update-conflict slot1 new-slot)
-                                             (update-conflict slot2)
-                                             (vec)))
-                                   ;; a < n
-                                   -1 (case order-with-second
-                                        ;; a < n < b
-                                        1 [slot1 new-slot slot2]
-                                        ;; a < n~b
-                                        0 [slot1 (update-conflict slot2 new-slot)]
-                                        ;; a < b < n
-                                        -1 [slot1 slot2]))
-                                 (concat result))]
-      (println "orders" order-with-first order-with-second)
-      (if (= -1 order-with-first order-with-second)
-        new-result
-        {:break! new-result}))))
+          (and inserted? (time-overlap? [s1 e1] [s2 e2]))
+          [true result (update-conflict slot1 slot2)]
+
+          inserted?
+          [true (conj result slot1) slot2]
+
+          :else
+          (let [orders [(time-order [new-slot-start new-slot-end] [s1 e1]) (time-order [new-slot-start new-slot-end] [s2 e2])]]
+            (println orders "inserting" [new-slot-start new-slot-end] "|" [s1 e1] "|" [s2 e2])
+            (case orders
+              ;; n < a < b
+              [1 1] [true (conj result new-slot slot1) slot2]
+              ;; a~n < b
+              [0 1] [true (conj result (update-conflict new-slot slot1)) slot2]
+              ;; a~n~b
+              [0 0] [true result (-> (update-conflict new-slot slot1)
+                                     (update-conflict slot2))]
+              ;; a < n < b
+              [-1 1] [true (conj result slot1 new-slot) slot2]
+              ;; a < n~b
+              [-1 0] [true (conj result slot1) (update-conflict new-slot slot2)]
+              ;; a < b < n
+              [-1 -1] [false (conj result slot1) slot2])))))
+
 
 (defn insert-slot-to-column [column-slots {new-slot-start :start-time
                                            new-slot-end   :end-time
                                            :as            new-slot}]
-  (case (count column-slots)
-    0 [new-slot]
-    1 (let [{:keys [start-time end-time] :as slot1} (first column-slots)]
-        (println "single")
+  (if (empty? column-slots)
+    [new-slot]
+    (let [[inserted? result {:keys [start-time end-time] :as last-slot}]
+          (reduce (insert-slot new-slot)
+                  [false [] nil]
+                  column-slots)]
+      (cljs.pprint/pprint [inserted? result last-slot])
+      (if inserted?
+        (conj result last-slot)
         (case (time-order [new-slot-start new-slot-end] [start-time end-time])
-          1 [new-slot slot1]
-          0 [(update-conflict slot1 new-slot)]
-          -1 [slot1 new-slot]))
-    (do
-      (println "multiple")
-      (utils/reduce-lazy-lookahead (insert-slot new-slot) [] column-slots))))
+          1 (conj result new-slot last-slot)
+          0 (conj result (update-conflict last-slot new-slot))
+          -1 (conj result last-slot new-slot))))))
 
 (defn add-time-slot [slots {:keys [column] :as slot}]
   (update slots column insert-slot-to-column slot))
 
-;; TODO more testing
 
 (def sample-slots {"monday"  [{:main-label   "CSCA08"
                                :abbreviation "A08"
@@ -138,4 +149,13 @@
             :end-time     18
             :optional     {:type "apple"}})
 
-#_(add-time-slot sample-slots slot1)
+(add-time-slot sample-slots slot1)
+(add-time-slot sample-slots slot2)
+
+(add-time-slot sample-slots {:main-label   "BBBBBB"
+                             :abbreviation "BBB"
+                             :group        "BBBBBB"
+                             :column       "monday"
+                             :start-time   14
+                             :end-time     17
+                             :optional     {:type "apple"}})

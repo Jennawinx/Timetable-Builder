@@ -62,8 +62,11 @@
   "A reduce-like function that consumes the next 2 values and stops if the
   result of the applied function is :break
 
+  the given function 'single-fn' takes form of (fn [result this] ...) and should return the final value
+  this function is applied if the last element in the collection is ever reached
+
   the given function 'inner-fn' takes form of (fn [result this next] ...)
-  and returns a value or {:break! value} which stops the next consumption and returns value
+  and should return a value or {:break! value} which stops the next consumption and returns value
   if 'coll' has less than 2 values, reduce-lazy-lookahead returns the given 'value'
 
   Example: Sum all consecutive even pairs
@@ -88,7 +91,8 @@
         (if (= 0 result)
           (+ result this next)
           (+ result next))
-        {:break! result}))
+        {:break$ true
+         :result$ result}))
     0
     [6 2 2 8 3 4 5 4 2 4])
   =>
@@ -96,13 +100,28 @@
   "
   ;; TODO change to loop and recur
   ([inner-fn value coll]
-   (reduce-lazy-lookahead inner-fn value (first coll) (rest coll)))
-  ([inner-fn result this coll]
-   (if (empty? coll)
-     result
-     (let [nxt      (first coll)
-           the-rest (rest coll)
-           value    (inner-fn result this nxt)]
-       (if (and (map? value) (some? (:break! value)))
-         (:break! value)
-         (reduce-lazy-lookahead inner-fn value nxt the-rest))))))
+   (reduce-lazy-lookahead (fn [result _] result) inner-fn value coll))
+  ([single-fn inner-fn value coll]
+   (loop [result value
+          this   (first coll)
+          coll   (rest coll)]
+     (cond
+       (and (empty? coll) (nil? this))
+       result
+
+       (empty? coll)
+       (single-fn result this)
+
+       :else
+       (let [nxt      (first coll)
+             the-rest (rest coll)
+             value    (inner-fn result this nxt)]
+         (if (and (map? value) (:break$ value) (some? (:result$ value)))
+           (:result$ value)
+           (recur value nxt the-rest)))))))
+
+(defn decimal->str-percent [decimal]
+  (-> decimal
+      (* 100)
+      (int)
+      (str "%")))
