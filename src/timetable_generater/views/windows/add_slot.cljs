@@ -13,8 +13,6 @@
 (def rf-sub-location-data (conj rf-sub-location :data))
 (def rf-sub-location-required rf-sub-location-data)
 (def rf-sub-location-optional (conj rf-sub-location-data :optional))
-(def days #{"monday" "tuesday" "wednesday" "thursday" "friday" "saturday" "sunday"
-            "mon" "tue" "wed" "thu" "fri" "sat" "sun"})
 
 ;; TODO validate add-slot
 ;; TODO add valid slots to db
@@ -55,7 +53,7 @@
    ;; second row
    [:div.fields {:class "three"}
     [custom/field {:class "six wide"} "Day/Section"
-     [custom/ui-db-search (conj rf-sub-location-required :column) days]]
+     [custom/ui-db-search (conj rf-sub-location-required :column) @(rf/subscribe [:db-get-field :columns])]]
     [custom/field {:class "five wide"} "Start Time"
      [custom/ui-db-input (conj rf-sub-location-required :start-time) {:type "number" :min 0 :max 24 :step 1 :cast :number}]]
     [custom/field {:class "five wide"} "End Time"

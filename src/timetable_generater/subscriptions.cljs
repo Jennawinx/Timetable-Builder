@@ -16,16 +16,19 @@
                           "Listening to Music"                                                 "VPMA93"
                           "Introduction to Databases"                                          "CSCC43"
                           "Computer and Network Security"                                      "CSCD27"}
+
      :groups             #{"CSCC37" "STAB52" "PHLB50" "VPMA93" "CSCC43" "CSCD27"}
+     :columns            #{"monday" "tuesday" "wednesday" "thursday" "friday" "saturday" "sunday"
+                           "mon" "tue" "wed" "thu" "fri" "sat" "sun"}
      :labels             #{"room" "type" "number"}
 
      ;; styling
-     :themes             {"default" {:groups {"CSCC37" "#b3d5ad"
-                                              "STAB52" "rgb(253, 163, 176)"
-                                              "PHLB50" "rgb(251, 203, 173)"
-                                              "VPMA93" "#a0cbee"
+     :themes             {"default" {:groups {"CSCC37" "rgb(172, 214, 214)"
+                                              "STAB52" "rgb(142, 190, 220)"
+                                              "PHLB50" "rgb(255, 184, 186)"
+                                              "VPMA93" "rgb(242, 179, 253)"
                                               "CSCC43" "rgb(129, 215, 180)"
-                                              "CSCD27" "#eca3ec"}}}
+                                              "CSCD27" "rgb(207, 138, 232)"}}}
 
      :cell-views         {"default" [:div.slot.info
                                      [:div {:style {:font-weight    :bold
@@ -47,21 +50,21 @@
 
      ;; data
      :slots              {"mon"
-                          [{:group        "CSCC37",
+                          [{:group        "VPMA93",
+                            :optional     {"number" "1", "type" "lec", "room" "AA 112"},
+                            :main-label   "Listening to Music",
+                            :column       "mon",
+                            :abbreviation "VPMA93",
+                            :start-time   9,
+                            :end-time     11}
+                           {:group        "CSCC37",
                             :optional     {"number" "1", "type" "lec", "room" "AA 112"},
                             :main-label
                                           "Introduction to Numerical Algorithms for Computational Mathematics",
                             :abbreviation "CSCC37",
                             :column       "mon",
                             :start-time   14,
-                            :end-time     17}
-                           {:group        "VPMA93",
-                            :optional     {"number" "1", "type" "lec", "room" "AA 112"},
-                            :main-label   "Listening to Music",
-                            :column       "mon",
-                            :abbreviation "VPMA93",
-                            :start-time   9,
-                            :end-time     11}],
+                            :end-time     17}],
                           "thu"
                           [{:group        "STAB52",
                             :optional     {"number" "1", "type" "lec", "room" "SW 309"},
@@ -204,4 +207,10 @@
 (rf/reg-event-db
   :add-slot/add-slot
   (fn [db _]
-    (update db :slots time-logic/add-time-slot (get-in db [:editor :add-slot :data]))))
+    (let [{:keys [main-label group label column abbreviation] :as slot} (get-in db [:editor :add-slot :data])]
+      (-> db
+          (update :slots time-logic/add-time-slot slot)
+          (update :main-labels assoc main-label abbreviation)
+          (update :groups conj group)
+          (update :labels conj label)
+          (update :columns conj column)))))

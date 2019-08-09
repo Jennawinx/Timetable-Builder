@@ -54,12 +54,19 @@
 
 (defn match-search [strs]
   (fn [text callback]
-    (->> strs
-         (sort)
-         (filter #(s/includes? (s/lower-case %) (s/lower-case text)))
-         (take 5)
-         (clj->js)
-         (callback))))
+    (let [search-by-first-letters (->> strs
+                                       (sort)
+                                       (filter #(s/starts-with? (s/lower-case %) (s/lower-case text)))
+                                       (take 5))
+          search-by-inner-letters (->> strs
+                                       (sort)
+                                       (filter #(s/includes? (s/lower-case %) (s/lower-case text)))
+                                       (take 5))]
+      (->> (concat search-by-first-letters search-by-inner-letters)
+           (take 5)
+           (distinct)
+           (clj->js)
+           (callback)))))
 
 (defn typeahead-mounted [options this]
   (.typeahead (js/$ (reagent/dom-node this))
