@@ -2,7 +2,6 @@
   (:require
     [reagent.core :as r]
     [re-frame.core :as rf]
-    [timetable-generater.timetable :as timetable]
     [timetable-generater.views.add-data :as add-data]
     [timetable-generater.subscriptions]))
 
@@ -10,7 +9,6 @@
 ;; Views
 
 (defn home-page []
-  #_[timetable/load]
   [add-data/load])
 
 ;; -------------------------

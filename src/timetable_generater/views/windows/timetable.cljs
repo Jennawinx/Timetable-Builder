@@ -3,8 +3,7 @@
     [re-frame.core :as rf]
     [timetable-generater.subscriptions]
     [clojure.string :as s]
-    [timetable-generater.utils :as utils])
-  (:use [resources.mar10-2019-study :only (test-table)]))
+    [timetable-generater.utils :as utils]))
 
 ;; TODO fix grid logic
 ;; grid indices starts at 1
@@ -118,7 +117,7 @@
        [:div.table
         {:style {:display               :grid
                  :grid-template-columns (str "5ch repeat(" (count display-days) ", 1fr")
-                 :grid-template-rows    (str "2em repeat(" (get-rownum max-time) ", 1fr")
+                 :grid-template-rows    (str "2.5em repeat(" (get-rownum max-time) ", 1fr")
                  :width                 width
                  :height                height
                  :margin                :inherit}}
