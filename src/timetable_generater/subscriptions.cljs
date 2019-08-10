@@ -23,12 +23,12 @@
      :labels             #{"room" "type" "number"}
 
      ;; styling
-     :themes             {"default" {:groups {"CSCC37" "rgb(172, 214, 214)"
-                                              "STAB52" "rgb(142, 190, 220)"
-                                              "PHLB50" "rgb(255, 184, 186)"
-                                              "VPMA93" "rgb(242, 179, 253)"
-                                              "CSCC43" "rgb(129, 215, 180)"
-                                              "CSCD27" "rgb(207, 138, 232)"}}}
+     :themes             {"default" {:groups {"CSCC37" "rgb(164, 217, 217)"
+                                              "STAB52" "rgb(255, 198, 200)"
+                                              "PHLB50" "rgb(177, 207, 242)"
+                                              "VPMA93" "rgb(217, 192, 255)"
+                                              "CSCC43" "rgb(200, 227, 182)"
+                                              "CSCD27" "rgb(242, 179, 253)"}}}
 
      :cell-views         {"default"   [:div.slot.info
                                        [:div {:style {:font-weight    :bold

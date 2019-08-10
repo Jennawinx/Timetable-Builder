@@ -9,27 +9,41 @@
                       "Listening to Music"                                                 "VPMA93"
                       "Introduction to Databases"                                          "CSCC43"
                       "Computer and Network Security"                                      "CSCD27"}
+
  :groups             #{"CSCC37" "STAB52" "PHLB50" "VPMA93" "CSCC43" "CSCD27"}
+ :columns            #{"monday" "tuesday" "wednesday" "thursday" "friday" "saturday" "sunday"
+                       "mon" "tue" "wed" "thu" "fri" "sat" "sun"}
  :labels             #{"room" "type" "number"}
 
  ;; styling
- :themes             {"default" {:groups {"CSCC37" "rgb(172, 214, 214)"
-                                          "STAB52" "rgb(222, 138, 163)"
-                                          "PHLB50" "rgb(255, 184, 186)"
-                                          "VPMA93" "rgb(168, 201, 232)"
-                                          "CSCC43" "rgb(129, 215, 180)"
-                                          "CSCD27" "rgb(207, 138, 232)"}}}
+ :themes             {"default" {:groups {"CSCC37" "rgb(164, 217, 217)"
+                                          "STAB52" "rgb(255, 198, 200)"
+                                          "PHLB50" "rgb(177, 207, 242)"
+                                          "VPMA93" "rgb(217, 192, 255)"
+                                          "CSCC43" "rgb(200, 227, 182)"
+                                          "CSCD27" "rgb(242, 179, 253)"}}}
 
- :cell-views         {"default" [:div.slot.info
-                                 [:div {:style {:font-weight    :bold
-                                                :text-transform :uppercase
-                                                :font-size      "110%"
-                                                :margin-bottom  "0.25em"
-                                                }}
-                                  "{%abbreviation%}"]
-                                 [:div {:style {:text-transform :uppercase}}
-                                  "{%type%} {%number%}" [:br]
-                                  "{%room%}"]]}
+ :cell-views         {"default"   [:div.slot.info
+                                   [:div {:style {:font-weight    :bold
+                                                  :text-transform :uppercase
+                                                  :font-size      "110%"
+                                                  :margin-bottom  "0.25em"
+                                                  }}
+                                    "{%abbreviation%}"]
+                                   [:div {:style {:text-transform :uppercase}}
+                                    "{%type%} {%number%}" [:br]
+                                    "{%room%}"]]
+                      "alternate" [:div.slot.info
+                                   [:div {:style {:font-weight    :bold
+                                                  :text-transform :uppercase
+                                                  :font-size      "110%"
+                                                  :margin-bottom  "0.25em"
+                                                  }}
+                                    "{%abbreviation%}"]
+                                   [:div {:style {:text-transform :uppercase}}
+                                    "{%type%} {%room%}"]
+                                   [:hr]
+                                   [:div "{%desc%}"]]}
 
  :table-views        {"default" {:display-days ["mon" "tue" "wed" "thu" "fri"]
                                  :width        "74vh"
@@ -40,21 +54,21 @@
 
  ;; data
  :slots              {"mon"
-                      [{:group        "CSCC37",
+                      [{:group        "VPMA93",
+                        :optional     {"number" "1", "type" "lec", "room" "AA 112"},
+                        :main-label   "Listening to Music",
+                        :column       "mon",
+                        :abbreviation "VPMA93",
+                        :start-time   9,
+                        :end-time     11}
+                       {:group        "CSCC37",
                         :optional     {"number" "1", "type" "lec", "room" "AA 112"},
                         :main-label
                                       "Introduction to Numerical Algorithms for Computational Mathematics",
                         :abbreviation "CSCC37",
                         :column       "mon",
                         :start-time   14,
-                        :end-time     17}
-                       {:group        "VPMA93",
-                        :optional     {"number" "1", "type" "lec", "room" "AA 112"},
-                        :main-label   "Listening to Music",
-                        :column       "mon",
-                        :abbreviation "VPMA93",
-                        :start-time   9,
-                        :end-time     11}],
+                        :end-time     17}],
                       "thu"
                       [{:group        "STAB52",
                         :optional     {"number" "1", "type" "lec", "room" "SW 309"},
