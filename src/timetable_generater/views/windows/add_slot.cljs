@@ -5,7 +5,8 @@
             [re-frame.core :as rf]
             [timetable-generater.subscriptions]
             [timetable-generater.utils :refer [element-value]]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [timetable-generater.views.windows.timetable :as table]))
 
 
 (def editor :add-slot)
@@ -37,27 +38,97 @@
 
 (defn load-required-fields []
   [:div
+
    ;; first row
+
    [:div.fields {:class "three"}
     [custom/field {:class "eight wide"} "Main Label"
      [custom/ui-db-search (conj rf-sub-location-required :main-label) (keys @(rf/subscribe [:db-get-field :main-labels]))]]
     [custom/field {:class "three wide"} "Abbreviation"
      [custom/ui-db-input (conj rf-sub-location-required :abbreviation)
       ;; TODO do not use old subs
-      {:value    (or @(rf/subscribe [:db-get-in (conj rf-sub-location-required :abbreviation)])
-                     @(rf/subscribe [:add-slot/get-abbreviation])
-                     @(rf/subscribe [:db-get-in (conj rf-sub-location-required :main-label)]))}]]
+      {:value (or @(rf/subscribe [:db-get-in (conj rf-sub-location-required :abbreviation)])
+                  @(rf/subscribe [:add-slot/get-abbreviation])
+                  @(rf/subscribe [:db-get-in (conj rf-sub-location-required :main-label)]))}]]
     [custom/field {:class "five wide"} "Group"
      [custom/ui-db-search (conj rf-sub-location-required :group) @(rf/subscribe [:db-get-field :groups])]]]
 
    ;; second row
-   [:div.fields {:class "three"}
-    [custom/field {:class "six wide"} "Day/Section"
-     [custom/ui-db-search (conj rf-sub-location-required :column) @(rf/subscribe [:db-get-field :columns])]]
-    [custom/field {:class "five wide"} "Start Time"
-     [custom/ui-db-input (conj rf-sub-location-required :start-time) {:type "number" :min 0 :max 24 :step 1 :cast :number}]]
-    [custom/field {:class "five wide"} "End Time"
-     [custom/ui-db-input (conj rf-sub-location-required :end-time) {:type "number" :min 0 :max 24 :step 1 :cast :number}]]]])
+
+   (let [start-time @(rf/subscribe [:db-get-in (conj rf-sub-location-required :start-time)])
+         end-time   @(rf/subscribe [:db-get-in (conj rf-sub-location-required :end-time)])
+         min-time   @(rf/subscribe [:db-get-in (conj table/table-view-location :min-time)])
+         max-time   @(rf/subscribe [:db-get-in (conj table/table-view-location :max-time)])]
+
+     [:div.fields {:class "three"}
+      [custom/field {:class "six wide"} "Day/Section"
+       [custom/ui-db-search (conj rf-sub-location-required :column) @(rf/subscribe [:db-get-field :columns])]]
+
+      ;; TODO FACTOR OUT TIME STUFF
+
+      [custom/field {:class "three wide"} "Start Time"
+       [custom/ui-db-input (conj rf-sub-location-required :start-time)
+        {:type     "number"
+         ;; for the side increments
+         :onChange #(let [start-time (custom/cast :number (element-value %))]
+                      (if (some? start-time)
+                        (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time)
+                                      (if (<= end-time start-time)
+                                        (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time) (+ start-time 1)])
+                                            start-time)
+                                        start-time)])))
+         ;; for typing in input
+         :onBlur   #(let [start-time (custom/cast :number (element-value %))]
+                      (if (some? start-time)
+                        (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time)
+                                      (cond (or (< start-time min-time) (> (element-value %) max-time))
+                                            min-time
+
+                                            (<= end-time start-time)
+                                            (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time) (+ start-time 1)])
+                                                start-time)
+
+                                            :else start-time)])))
+         :pattern  "\\d+"
+         :min      min-time
+         :max      max-time
+         :step     1
+         :cast     :number}]]
+
+      [custom/field {:class "three wide"} "End Time"
+       [custom/ui-db-input (conj rf-sub-location-required :end-time)
+        {:type     "number"
+         ;; for the side increments
+         ;; BUGGY because when backing and typing, single letter maybe less than start-time
+         ;:onChange #(let [end-time (custom/cast :number (element-value %))]
+         ;             (when (some? end-time)
+         ;               (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time)
+         ;                             (if (<= end-time start-time)
+         ;                               (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time) (- end-time 1)])
+         ;                                   end-time)
+         ;                               end-time)])))
+
+         ;; for typing in input
+         :onBlur   #(let [end-time (custom/cast :number (element-value %))]
+                      (when (some? end-time)
+                        (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time)
+                                      (cond (or (< end-time min-time) (> (element-value %) max-time))
+                                            max-time
+
+                                            (<= end-time start-time)
+                                            (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time) (- end-time 1)])
+                                                end-time)
+
+                                            :else end-time)])))
+
+         :pattern  "\\d*"
+         :min      min-time
+         :max      max-time
+         :step     1
+         :cast     :number}]]
+
+      [custom/field {:class "four wide"} "Template"
+       [custom/ui-db-search (conj rf-sub-location-required :template) (keys @(rf/subscribe [:db-get-field :cell-views])) {:placeholder "default"}]]])])
 
 
 (defn add-field []
@@ -85,13 +156,21 @@
      ;; Finish
      [:div.fields {:class "two"}
       [custom/ui-button
-       {:class   "ui button field twelve wide"
+       {:class   "ui button field ten wide"
         :onClick #(rf/dispatch [:add-slot/add-slot])}
        "Add Time Slot"]
       [custom/ui-button
-       {:class   "ui button field four wide"
+       {:class   "ui button field three wide"
         :onClick #(rf/dispatch [:db-assoc-in rf-sub-location {}])}
        "Clear All"]
+      [custom/ui-button
+       {:class   "ui button field one wide"
+        :onClick #(cljs.pprint/pprint (:editor @(rf/subscribe [:db-peek])))}
+       "Editor"]
+      [custom/ui-button
+       {:class   "ui button field one wide"
+        :onClick #(cljs.pprint/pprint (:slots @(rf/subscribe [:db-peek])))}
+       "Data"]
       [custom/ui-button
        {:class   "ui button field one wide"
         :onClick #(cljs.pprint/pprint @(rf/subscribe [:db-peek]))}

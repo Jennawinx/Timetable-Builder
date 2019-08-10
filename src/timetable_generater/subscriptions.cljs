@@ -30,16 +30,27 @@
                                               "CSCC43" "rgb(129, 215, 180)"
                                               "CSCD27" "rgb(207, 138, 232)"}}}
 
-     :cell-views         {"default" [:div.slot.info
-                                     [:div {:style {:font-weight    :bold
-                                                    :text-transform :uppercase
-                                                    :font-size      "110%"
-                                                    :margin-bottom  "0.25em"
-                                                    }}
-                                      "{%abbreviation%}"]
-                                     [:div {:style {:text-transform :uppercase}}
-                                      "{%type%} {%number%}" [:br]
-                                      "{%room%}"]]}
+     :cell-views         {"default"   [:div.slot.info
+                                       [:div {:style {:font-weight    :bold
+                                                      :text-transform :uppercase
+                                                      :font-size      "110%"
+                                                      :margin-bottom  "0.25em"
+                                                      }}
+                                        "{%abbreviation%}"]
+                                       [:div {:style {:text-transform :uppercase}}
+                                        "{%type%} {%number%}" [:br]
+                                        "{%room%}"]]
+                          "alternate" [:div.slot.info
+                                       [:div {:style {:font-weight    :bold
+                                                      :text-transform :uppercase
+                                                      :font-size      "110%"
+                                                      :margin-bottom  "0.25em"
+                                                      }}
+                                        "{%abbreviation%}"]
+                                       [:div {:style {:text-transform :uppercase}}
+                                        "{%type%} {%room%}"]
+                                       [:hr]
+                                       [:div "{%desc%}"]]}
 
      :table-views        {"default" {:display-days ["mon" "tue" "wed" "thu" "fri"]
                                      :width        "74vh"

@@ -11,7 +11,6 @@
 
 (def table-view-location [:table-views "default"])
 (def group-colours [:themes "default" :groups])
-(def cell-view [:cell-views "default"])
 (def hr-divions 4)                                          ; slot accuracy TODO this should not be manual
 (def template-ignore-keys [:optional :template])
 
@@ -54,16 +53,20 @@
        (str (t24->t12 time))])))
 
 
-(defn time-slot-cell [parent-start parent-end {:keys [start-time end-time optional group] :as slot}]
-  (let [data (merge (apply (partial dissoc slot) template-ignore-keys)
-                    optional)]
+(defn time-slot-cell [parent-start parent-end {:keys [start-time end-time optional group template]
+                                               :or   {template "default"}
+                                               :as   slot}]
+  (let [data   (merge (apply (partial dissoc slot) template-ignore-keys)
+                      optional)
+        hiccup (or @(rf/subscribe [:db-get-in [:cell-views template]])
+                   [:div.slot.info [:b [:p "{%main-label%}"]] [:p {:style {:color :red}} "no template found"]])]
     [:div.slot-container
      {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
               :margin-top       (utils/decimal->str-percent (/ (- start-time parent-start)
                                                                (- parent-end parent-start)))
               :height           (utils/decimal->str-percent (/ (- end-time start-time)
                                                                (- parent-end parent-start)))}}
-     (utils/fill-template @(rf/subscribe [:db-get-in cell-view]) data)]))
+     (utils/fill-template hiccup data)]))
 
 
 (defn show-time-block [day-col slot]
@@ -74,8 +77,8 @@
 
 (defn time-cell-summary [{:keys [start-time end-time abbreviation group]}]
   [:div {:style {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
-                                :width            "100%"
-                                :font-size        "1em"}}
+                 :width            "100%"
+                 :font-size        "1em"}}
    [:div.slot {:style {:display         :flex
                        :justify-content :space-between}}
     [:div abbreviation] [:div start-time "-" end-time]]])
