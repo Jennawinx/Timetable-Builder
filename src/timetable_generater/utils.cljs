@@ -6,6 +6,10 @@
   (.. e -target -value))
 
 
+(defn vector-remove [vector idx]
+  (remove #(= % (nth vector idx)) vector))
+
+
 (defn string-injection
   "Replaces {%variable%} in strings with it's corresponding value given in var->str
   variable references a string or keyword name to the value in the given map"

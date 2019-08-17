@@ -91,13 +91,6 @@
                         :column       "thu",
                         :start-time   13,
                         :end-time     14}
-                       {:group        "CSCC43",
-                        :optional     {"number" "1", "type" "lec", "room" "IC 220"},
-                        :main-label   "Introduction to Databases",
-                        :abbreviation "CSCC43",
-                        :column       "thu",
-                        :start-time   14,
-                        :end-time     16}
                        {:group        "CSCC37",
                         :optional     {"number" "1", "type" "tut", "room" "HW 408"},
                         :main-label
@@ -141,7 +134,15 @@
                         :abbreviation "CSCD27",
                         :column       "tue",
                         :start-time   17,
-                        :end-time     18}]}
+                        :end-time     18}]
+                      "fri"
+                      [{:group        "CSCC43",
+                        :optional     {"number" "1", "type" "lec", "room" "SW 143"},
+                        :main-label   "Introduction to Databases",
+                        :abbreviation "CSCC43",
+                        :column       "fri",
+                        :start-time   10,
+                        :end-time     12}]}
 
  ;; ----------------------------------------- Replacable Here ---------------------------------------
 

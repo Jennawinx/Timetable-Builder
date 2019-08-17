@@ -69,21 +69,21 @@
       [custom/field {:class "three wide"} "Start Time"
        [custom/ui-db-input (conj rf-sub-location-required :start-time)
         {:type     "number"
+         ;; TODO how to fix do they don't break on hot reload
          ;; for the side increments
-         :onChange #(let [start-time (custom/cast :number (element-value %))]
-                      (if (some? start-time)
+         #_#_:onChange #(let [start-time (custom/cast :number (element-value %))]
+                      (when (number? start-time)
                         (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time)
                                       (if (<= end-time start-time)
                                         (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time) (+ start-time 1)])
                                             start-time)
                                         start-time)])))
          ;; for typing in input
-         :onBlur   #(let [start-time (custom/cast :number (element-value %))]
-                      (if (some? start-time)
+         #_#_:onBlur   #(let [start-time (custom/cast :number (element-value %))]
+                      (when (number? start-time)
                         (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time)
                                       (cond (or (< start-time min-time) (> (element-value %) max-time))
                                             min-time
-
                                             (<= end-time start-time)
                                             (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time) (+ start-time 1)])
                                                 start-time)
@@ -97,9 +97,9 @@
 
       [custom/field {:class "three wide"} "End Time"
        [custom/ui-db-input (conj rf-sub-location-required :end-time)
-        {:type     "number"
+        {:type    "number"
          ;; for the side increments
-         ;; BUGGY because when backing and typing, single letter maybe less than start-time
+         ;; NOTE BUGGY because when backing and typing, single letter maybe less than start-time
          ;:onChange #(let [end-time (custom/cast :number (element-value %))]
          ;             (when (some? end-time)
          ;               (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time)
@@ -108,24 +108,25 @@
          ;                                   end-time)
          ;                               end-time)])))
 
+         ;; TODO how to fix do they don't break on hot reload
          ;; for typing in input
-         :onBlur   #(let [end-time (custom/cast :number (element-value %))]
-                      (when (some? end-time)
-                        (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time)
-                                      (cond (or (< end-time min-time) (> (element-value %) max-time))
-                                            max-time
+         #_#_:onBlur  #(let [end-time (custom/cast :number (element-value %))]
+                     (when (some? end-time)
+                       (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :end-time)
+                                     (cond (or (< end-time min-time) (> (element-value %) max-time))
+                                           max-time
 
-                                            (<= end-time start-time)
-                                            (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time) (- end-time 1)])
-                                                end-time)
+                                           (<= end-time start-time)
+                                           (do (rf/dispatch [:db-assoc-in (conj rf-sub-location-required :start-time) (- end-time 1)])
+                                               end-time)
 
-                                            :else end-time)])))
+                                           :else end-time)])))
 
-         :pattern  "\\d*"
-         :min      min-time
-         :max      max-time
-         :step     1
-         :cast     :number}]]
+         :pattern "\\d*"
+         :min     min-time
+         :max     max-time
+         :step    1
+         :cast    :number}]]
 
       [custom/field {:class "four wide"} "Template"
        [custom/ui-db-search (conj rf-sub-location-required :template) (keys @(rf/subscribe [:db-get-field :cell-views])) {:placeholder "default"}]]])])

@@ -42,8 +42,9 @@
 }
 
 .conflict-container {
-    border-left: 0.5em solid #b3acac;
-    border-right: 0.5em solid #b3acac;
+    /*border-left: 0.5em solid #b3acac;
+    border-right: 0.5em solid #b3acac;*/
+    border: 0.5em solid #b3acac;
     width:       100%;
     padding: 0;
 }
