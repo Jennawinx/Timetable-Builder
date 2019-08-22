@@ -7,7 +7,7 @@
 
 
 (defn vector-remove [vector idx]
-  (remove #(= % (nth vector idx)) vector))
+  (vec (remove #(= % (nth vector idx)) vector)))
 
 
 (defn string-injection

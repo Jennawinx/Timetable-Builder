@@ -16,7 +16,8 @@
    [:div.row {:style {:height "100%"}}
     ;; LEFT side
     [:div.column.ten.wide {:style {:padding 0
-                                   :height  "100%"}}
+                                   :height  "100%"
+                                   :background-color "darkgrey"}}
 
      [timetable/load {:style {:margin :auto
                               :height "100%"}}]]

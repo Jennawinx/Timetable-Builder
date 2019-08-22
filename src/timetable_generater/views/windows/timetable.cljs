@@ -1,8 +1,8 @@
 (ns timetable-generater.views.windows.timetable
   (:require
-    [re-frame.core :as rf]
-    [timetable-generater.subscriptions]
     [clojure.string :as s]
+    [re-frame.core :as rf]
+    [timetable-generater.subscriptions :as subs]
     [timetable-generater.utils :as utils :refer [vector-remove]]
     [timetable-generater.views.windows.add-slot :as add-slot ;; TODO should not have to reference, need to pull stuff out
      ]))
@@ -13,17 +13,16 @@
 
 ;; NOTE grid indices starts at 1
 
-(def table-view-location [:table-views "default"])
-(def group-colours [:themes "default" :groups])
 (def hr-divions 4)                                          ; slot accuracy TODO this should not be manual
-(def template-ignore-keys [:optional :template])
+
 
 (defn t24->t12 [time]
   (let [x (mod time 12)]
     (if (= x 0) 12 x)))
 
+
 (defn get-rownum [hr]
-  (let [start-time @(rf/subscribe [:db-get-in (conj table-view-location :min-time)])]
+  (let [start-time @(rf/subscribe [:db-get-in (conj subs/table-view-location :min-time)])]
     (-> hr
         (- start-time)                                      ;; calculate the time interval
         (* hr-divions)                                      ;; the division accuracy
@@ -66,6 +65,7 @@
         conflict-container @(rf/subscribe [:db-get-in conflict-location])]
 
     #(if (and (= :items second-last-location) (= (count (:items conflict-container)) 2))
+       ;; TODO remove
        (do (println "assoc" (last location) (- 1 (last location)))
            (cljs.pprint/pprint conflict-container)
            (println (get-in conflict-container [:items (- 1 (last location))]))
@@ -77,7 +77,7 @@
   ^{:key location}
   [:div {:onClick       (clone-cell location)
          :onDoubleClick (remove-cell location)
-         :style         {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
+         :style         {:background-color (or @(rf/subscribe [:db-get-in (conj subs/default-group-colours group)]) "snow")
                          :width            "100%"
                          :font-size        "1em"}}
    [:div.slot {:style {:display         :flex
@@ -89,7 +89,7 @@
                                                         :or   {template "default"}
                                                         :as   slot}]
 
-  (let [data   (merge optional (apply (partial dissoc slot) template-ignore-keys))
+  (let [data   (merge optional (apply (partial dissoc slot) subs/template-ignore-keys))
         hiccup (or @(rf/subscribe [:db-get-in [:cell-views template]])
                    [:div.slot.info [:b [:p "{%main-label%}"]] [:p {:style {:color :red}} "no template found"]])]
 
@@ -97,7 +97,7 @@
      {:onClick       (clone-cell location)
       :onDoubleClick (remove-cell location)
 
-      :style         {:background-color (or @(rf/subscribe [:db-get-in (conj group-colours group)]) "snow")
+      :style         {:background-color (or @(rf/subscribe [:db-get-in (conj subs/default-group-colours group)]) "snow")
                       :top              (utils/decimal->str-percent (/ (- start-time parent-start)
                                                                        (- parent-end parent-start)))
                       :height           (utils/decimal->str-percent (/ (- end-time start-time)
@@ -135,7 +135,7 @@
     (for [[day slots] @(rf/subscribe [:db-get-field :slots])
           idx (range (count slots))]
       (let [{:keys [conflict?] :as slot} (nth slots idx)
-            day-col (-> @(rf/subscribe [:db-get-in (conj table-view-location :display-days)])
+            day-col (-> @(rf/subscribe [:db-get-in (conj subs/table-view-location :display-days)])
                         (.indexOf day)
                         (get-colnum))]
         (if conflict?
@@ -147,8 +147,8 @@
 
 (defn load [& [config]]
   [:div#table-view config
-   #_(println @(rf/subscribe [:db-get-in table-view-location]))
-   (if-let [table-config @(rf/subscribe [:db-get-in table-view-location])]
+   #_(println @(rf/subscribe [:db-get-in subs/table-view-location]))
+   (if-let [table-config @(rf/subscribe [:db-get-in subs/table-view-location])]
      (let [{:keys [display-days width height increment min-time max-time]} table-config]
        [:div.table
         {:style {:display               :grid

@@ -1,12 +1,11 @@
 (ns timetable-generater.views.windows.add-slot
   (:require [fulcrologic.semantic-ui.factories :as f]
             [fulcrologic.semantic-ui.icons :as icons]
-            [timetable-generater.custom-components :as custom]
             [re-frame.core :as rf]
-            [timetable-generater.subscriptions]
-            [timetable-generater.utils :refer [element-value]]
             [reagent.core :as r]
-            [timetable-generater.views.windows.timetable :as table]))
+            [timetable-generater.subscriptions :as subs]
+            [timetable-generater.custom-components :as custom]
+            [timetable-generater.utils :refer [element-value]]))
 
 
 (def editor :add-slot)
@@ -33,7 +32,9 @@
   (->> fields
        sort
        (map load-optional-field)
-       (into [:div])))
+       (into [:div {:style {:height "30vh"
+                            :overflow-y :scroll
+                            :overflow-x :hidden}}])))
 
 
 (defn load-required-fields []
@@ -57,8 +58,8 @@
 
    (let [start-time @(rf/subscribe [:db-get-in (conj rf-sub-location-required :start-time)])
          end-time   @(rf/subscribe [:db-get-in (conj rf-sub-location-required :end-time)])
-         min-time   @(rf/subscribe [:db-get-in (conj table/table-view-location :min-time)])
-         max-time   @(rf/subscribe [:db-get-in (conj table/table-view-location :max-time)])]
+         min-time   @(rf/subscribe [:db-get-in (conj subs/table-view-location :min-time)])
+         max-time   @(rf/subscribe [:db-get-in (conj subs/table-view-location :max-time)])]
 
      [:div.fields {:class "three"}
       [custom/field {:class "six wide"} "Day/Section"
@@ -157,22 +158,10 @@
      ;; Finish
      [:div.fields {:class "two"}
       [custom/ui-button
-       {:class   "ui button field ten wide"
+       {:class   "ui button field ten teal wide"
         :onClick #(rf/dispatch [:add-slot/add-slot])}
        "Add Time Slot"]
       [custom/ui-button
-       {:class   "ui button field three wide"
+       {:class   "ui button field six red wide"
         :onClick #(rf/dispatch [:db-assoc-in rf-sub-location {}])}
-       "Clear All"]
-      [custom/ui-button
-       {:class   "ui button field one wide"
-        :onClick #(cljs.pprint/pprint (:editor @(rf/subscribe [:db-peek])))}
-       "Editor"]
-      [custom/ui-button
-       {:class   "ui button field one wide"
-        :onClick #(cljs.pprint/pprint (:slots @(rf/subscribe [:db-peek])))}
-       "Data"]
-      [custom/ui-button
-       {:class   "ui button field one wide"
-        :onClick #(cljs.pprint/pprint @(rf/subscribe [:db-peek]))}
-       "Peek"]]]]])
+       "Clear All"]]]]])

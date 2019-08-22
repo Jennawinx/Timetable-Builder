@@ -63,6 +63,20 @@
                                                     :margin-bottom "0.25em"
                                                     :width         "100%"
                                                     }}
+                                      "{%abbreviation%}"]]
+                          "ghost"   [:div.slot.info {:style {:color            "snow"
+                                                             :background-color "black"
+                                                             :border           "2px dashed snow"
+                                                             :padding          "0.20em"}}
+                                     [:div {:style {:text-transform  :uppercase
+                                                    :font-size       "80%"
+                                                    :display         :flex
+                                                    :justify-content :space-between}}
+                                      [:div "{%type%} {%number%}"] [:div "{%room%}"]]
+                                     [:div {:style {:font-weight    :bold
+                                                    :text-transform :uppercase
+                                                    :font-size      "95%"
+                                                    :margin-top     "0.20em"}}
                                       "{%abbreviation%}"]]}
 
      :table-views        {"default" {:display-days ["mon" "tue" "wed" "thu" "fri"]
@@ -89,6 +103,20 @@
                             :abbreviation "VPMA93",
                             :start-time   9,
                             :end-time     11}
+                           {:group        "CSCD27",
+                            :optional     {"number" "4", "type" "tut", "room" "IC 302"},
+                            :main-label   "Computer and Network Security",
+                            :abbreviation "CSCD27",
+                            :column       "mon",
+                            :start-time   12,
+                            :end-time     13}
+                           {:group        "CSCD27",
+                            :optional     {"number" "1", "type" "pra", "room" "BV 473"},
+                            :main-label   "Computer and Network Security",
+                            :abbreviation "CSCD27",
+                            :column       "mon",
+                            :start-time   13,
+                            :end-time     14}
                            {:group        "CSCC37",
                             :optional     {"number" "1", "type" "lec", "room" "AA 112"},
                             :main-label
@@ -97,6 +125,14 @@
                             :column       "mon",
                             :start-time   14,
                             :end-time     17}
+                           {:group        "CSCC37",
+                            :optional     {"number" "10", "type" "tut", "room" "IC 326"},
+                            :main-label
+                                          "Introduction to Numerical Algorithms for Computational Mathematics",
+                            :abbreviation "CSCC37",
+                            :column       "mon",
+                            :start-time   18,
+                            :end-time     19}
                            {:group        "Sleep",
                             :optional     {"number" "", "type" "", "room" ""},
                             :main-label   "Sleep",
@@ -104,7 +140,7 @@
                             :column       "mon",
                             :end-time     23,
                             :start-time   22,
-                            :template     "Sleep"}],
+                            :template     "Sleep"}]
                           "thu"
                           [{:group        "Commute",
                             :optional     {"number" "", "type" "", "room" ""},
@@ -135,14 +171,18 @@
                             :column       "thu",
                             :start-time   13,
                             :end-time     14}
-                           {:group        "CSCC37",
-                            :optional     {"number" "1", "type" "tut", "room" "HW 408"},
-                            :main-label
-                                          "Introduction to Numerical Algorithms for Computational Mathematics",
-                            :abbreviation "CSCC37",
+                           {:group        "CSCC43",
+                            :optional
+                                          {"number"   "1",
+                                           "type"     "lec",
+                                           "room"     "SW 143",
+                                           "template" "alternate"},
+                            :main-label   "Introduction to Databases",
+                            :abbreviation "CSCC43",
                             :column       "thu",
                             :start-time   18,
-                            :end-time     19}
+                            :end-time     20,
+                            :template     "ghost"}
                            {:group        "Sleep",
                             :optional     {"number" "", "type" "", "room" ""},
                             :main-label   "Sleep",
@@ -173,7 +213,8 @@
                             :abbreviation "CSCC43",
                             :column       "tue",
                             :start-time   12,
-                            :end-time     13}
+                            :end-time     13,
+                            :template     "ghost"}
                            {:group        "PHLB50",
                             :optional     {"number" "1", "type" "lec", "room" "HW 215"},
                             :main-label   "Symbolic Logic I",
@@ -181,20 +222,6 @@
                             :start-time   13,
                             :end-time     15,
                             :abbreviation "PHLB50"}
-                           {:group        "CSCD27",
-                            :optional     {"number" "4", "type" "pra", "room" "BV 473"},
-                            :main-label   "Computer and Network Security",
-                            :abbreviation "CSCD27",
-                            :column       "tue",
-                            :start-time   16,
-                            :end-time     17}
-                           {:group        "CSCD27",
-                            :optional     {"number" "1", "type" "tut", "room" "AA 207"},
-                            :main-label   "Computer and Network Security",
-                            :abbreviation "CSCD27",
-                            :column       "tue",
-                            :start-time   17,
-                            :end-time     18}
                            {:group        "Sleep",
                             :optional     {"number" "", "type" "", "room" ""},
                             :main-label   "Sleep",
@@ -213,12 +240,17 @@
                             :end-time     9,
                             :start-time   8}
                            {:group        "CSCC43",
-                            :optional     {"number" "1", "type" "lec", "room" "SW 143"},
+                            :optional
+                                          {"number"   "1",
+                                           "type"     "lec",
+                                           "room"     "SW 143",
+                                           "template" "alternate"},
                             :main-label   "Introduction to Databases",
                             :abbreviation "CSCC43",
                             :column       "fri",
                             :start-time   10,
-                            :end-time     12}
+                            :end-time     12,
+                            :template     "ghost"}
                            {:group        "Sleep",
                             :optional     {"number" "", "type" "", "room" ""},
                             :main-label   "Sleep",
@@ -250,6 +282,12 @@
                                                                "room"   ""}}
                                      :field-to-add ""}}
      }))
+
+
+(def table-view-location [:table-views "default"])
+(def default-group-colours [:themes "default" :groups])
+(def template-ignore-keys [:optional :template])
+
 
 (rf/reg-sub
   :db-peek
