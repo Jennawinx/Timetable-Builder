@@ -1,3 +1,21 @@
+### Objective
+
+Create a highly customizable timetable
+
+### View
+
+
+
+### Todo
+
+* Do proper saving to file (How?)
+* Fix UI (Make editor collapsable?)
+* Fix Subscriptions
+* Refactor
+
+### Future (Optional) Things to Add
+
+* Have way to read data from an existing text file if given parsing instructions (Maybe this exists or could be a different project)
 
 ### Development mode
 
