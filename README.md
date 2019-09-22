@@ -4,7 +4,7 @@ Create a highly customizable timetable
 
 ### View
 
-
+![image](resources/Example-Editor.png?raw=true "Screenshot of Editor")
 
 ### Todo
 
