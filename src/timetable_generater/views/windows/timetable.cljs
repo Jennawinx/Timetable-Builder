@@ -13,7 +13,7 @@
 
 ;; NOTE grid indices starts at 1
 
-(def hr-divions 4)                                          ; slot accuracy TODO this should not be manual
+(def hr-divions 8)                                          ; slot accuracy TODO this should not be manual
 
 
 (defn t24->t12 [time]

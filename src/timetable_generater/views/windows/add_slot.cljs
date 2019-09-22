@@ -90,7 +90,7 @@
                                                 start-time)
 
                                             :else start-time)])))
-         :pattern  "\\d+"
+         ;:pattern  "\\d+"
          :min      min-time
          :max      max-time
          :step     1
@@ -123,7 +123,7 @@
 
                                            :else end-time)])))
 
-         :pattern "\\d*"
+         ;:pattern "\\d*"
          :min     min-time
          :max     max-time
          :step    1

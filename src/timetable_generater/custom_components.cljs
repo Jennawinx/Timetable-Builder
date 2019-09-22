@@ -15,7 +15,7 @@
   (if (s/blank? s)
     ""
     (case type
-      :number (js/parseInt s)
+      :number (js/parseFloat s)
       s)))
 
 (defn field
