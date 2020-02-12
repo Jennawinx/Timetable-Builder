@@ -1,17 +1,62 @@
-
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <link href="css/site.css" rel="stylesheet" type="text/css">
     <link href="css/table.css" rel="stylesheet" type="text/css">
-  </head>
-  <body>
-    <div id="app">
-      <h3>ClojureScript has not been compiled!</h3>
-      <p>please run <b>lein figwheel</b> in order to start the compiler</p>
-    </div>
-    <script src="js/app.js" type="text/javascript"></script>
-  </body>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
+    <script src="https://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
+
+    <!-- TEMP -->
+    <style>
+      .ui.segment {
+        background-color: inherit;
+      }
+
+      .ui.form input[type=text] {
+        background-color: inherit;
+      }
+
+      .ui.button>.icon:not(.button) {
+        margin: 0 !important;
+      }
+
+      .ui.button.button-icon {
+        padding: 0.75em;
+      }
+
+      .twitter-typeahead {
+        width: 100%;
+      }
+
+      div.tt-menu {
+        width: 100%;
+        background-color: white;
+      }
+
+      div.tt-dataset.tt-dataset-states {
+        //padding: 0.25em;
+        //border-bottom: 1px solid rgba(34,36,45,.10);
+      }
+
+      div.tt-suggestion.tt-selectable {
+        padding: 0.2em 0.4em;
+        border-bottom: 1px solid rgba(34,36,38,.10);
+      }
+
+      div.tt-suggestion.tt-selectable:hover {
+        background-color: skyblue;
+      }
+
+    </style>
+</head>
+<body>
+<div id="app">
+    <h3>ClojureScript has not been compiled!</h3>
+    <p>please run <b>lein figwheel</b> in order to start the compiler</p>
+</div>
+<script src="js/app.js" type="text/javascript"></script>
+</body>
 </html>

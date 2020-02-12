@@ -4,9 +4,22 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.9.0"]
+  :dependencies [
+                 [org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.10.439"]
-                 [reagent "0.8.1"]]
+
+                 [cljs-ajax "0.6.0"]
+
+                 [reagent "0.8.1"]
+                 [re-frame "0.9.4"]
+                 [org.omcljs/om "1.0.0-beta1" :exclusions [cljsjs/react cljsjs/react-dom]]
+
+                 [fulcrologic/semantic-ui-react-wrappers "2.0.4"]
+                 [fulcrologic/fulcro "2.8.11"]
+                 [cljsjs/semantic-ui-react "0.87.1-0"]
+
+                 [cljsjs/jquery "2.2.2-0"]
+                 [cljsjs/typeahead-bundle "0.11.1-1"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-figwheel "0.5.16"]]
